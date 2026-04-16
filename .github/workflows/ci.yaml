@@ -16,7 +16,7 @@ jobs:
       - name: Copy files via SSH
         uses: appleboy/scp-action@v1
         with:
-          host: ${{ secrets.HOST }}
+          host: eef1df54591c.mylabserver.com
           username: root
           key: ${{ secrets.PRATYUSH_SSH_KEY }}
           source: "sites/pratyush/index.html"
