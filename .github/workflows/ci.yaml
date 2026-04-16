@@ -16,6 +16,6 @@ jobs:
               with:
                 host: ${{ secrets.HOST }}
                 username: ${{ secrets.USERNAME }}
-                password: ${{ secrets.PASSWORD }}
+                password: ${{ secrets.KEY }}
                 source: "sites/trainer/index.html"
                 target: /var/www/html/trainer/index.html
