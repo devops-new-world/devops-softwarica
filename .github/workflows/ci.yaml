@@ -1,0 +1,21 @@
+name: Deploy My website
+
+on:
+  push:
+    branches:
+    - "**"
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+
+            - name: Copy files via SSH
+              uses: appleboy/scp-action@v1
+              with:
+                host: ${{ secrets.HOST }}
+                username: ${{ secrets.USERNAME }}
+                password: ${{ secrets.PASSWORD }}
+                source: "sites/trainer/index.html"
+                target: /var/www/html/trainer/index.html
