@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/pratyush
+  workflow_dispatch: 
 
 jobs:
   deploy:
