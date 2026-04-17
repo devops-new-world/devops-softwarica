@@ -20,4 +20,5 @@ jobs:
 
       - name: Copy files via SSH
         run: |
-          scp -i ~/.ssh/id_rsa sites/rijen/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen
+          scp -i ~/.ssh/id_rsa sites/rijen/index.html \
+          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen/index.html
