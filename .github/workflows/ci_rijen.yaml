@@ -1,32 +1,23 @@
-name: Deploy My website
+name: Deploy rijen's website
 
 on:
   push:
     branches:
-      - "feature/rijen"
-
+      - "features/rijen"
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
+      - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          printf "%s" "${{ secrets.KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy via SCP
+      - name: Copy files via SSH
         run: |
-          scp -i ~/.ssh/id_rsa sites/rijen/index.html \
-          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:~/index.html
-
-      - name: Move to web root
-        run: |
-          ssh -i ~/.ssh/id_rsa \
-          ${{ secrets.USERNAME }}@${{ secrets.HOST }} \
-          "sudo mv ~/index.html /var/www/html/index.html"
+          scp -i ~/.ssh/id_rsa sites/rijen/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen
