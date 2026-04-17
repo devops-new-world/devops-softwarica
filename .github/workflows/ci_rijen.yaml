@@ -4,21 +4,29 @@ on:
   push:
     branches:
       - "feature/rijen"
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up SSH
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
+          printf "%s" "${{ secrets.KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Copy files via SSH
+      - name: Deploy via SCP
         run: |
           scp -i ~/.ssh/id_rsa sites/rijen/index.html \
-          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen/index.html
+          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:~/index.html
+
+      - name: Move to web root
+        run: |
+          ssh -i ~/.ssh/id_rsa \
+          ${{ secrets.USERNAME }}@${{ secrets.HOST }} \
+          "sudo mv ~/index.html /var/www/html/index.html"
