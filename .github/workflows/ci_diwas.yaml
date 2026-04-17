@@ -3,7 +3,7 @@ name: Deploy My website
 on:
   push:
     branches:
-    - "main"
+    - "feature/diwas"
 jobs:
     deploy:
         runs-on: ubuntu-latest
