@@ -3,7 +3,7 @@ name: Deploy My website
 on:
   push:
     branches:
-      - "**"
+      - "feature/rijen"
 jobs:
   deploy:
     runs-on: ubuntu-latest
