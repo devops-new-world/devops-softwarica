@@ -1,0 +1,24 @@
+name: Deploy Static Website
+
+on:
+  push:
+    branches:
+      - feature/prayug
+  workflow_dispatch: 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v1
+        with:
+          host: eef1df54591c.mylabserver.com
+          username: root
+          key: ${{ secrets.PRAYUG}}
+          source: "sites/prayug/index.html"
+          target: /var/www/html/prayug/
