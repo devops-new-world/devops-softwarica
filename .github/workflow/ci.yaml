@@ -1,23 +1,25 @@
-name: Deploy My website
+name: Deploy Static Website
 
 on:
   push:
     branches:
-    - "**"
-jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - name: checkout code
-              uses: actions/checkout@v4
-            
-            - name: Set up SSH
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+      - feature/pratyush
+  workflow_dispatch: 
 
-            - name: Copy files via SSH
-              run: |
-                scp -i ~/.ssh/id_rsa sites/trainer/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/trainer
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v1
+        with:
+          host: eef1df54591c.mylabserver.com
+          username: root
+          key: ${{ secrets.sujal_SSH_KEY }}
+          source: "sites/sujal/index.html"
+          target: /var/www/html/sujal/
+          strip_components: 2
