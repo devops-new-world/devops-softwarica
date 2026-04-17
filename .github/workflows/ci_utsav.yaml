@@ -1,9 +1,10 @@
+
 name: Deploy My website
 
 on:
   push:
     branches:
-    - "main"
+    - "feature/utsav"
 jobs:
     deploy:
         runs-on: ubuntu-latest
@@ -20,4 +21,4 @@ jobs:
 
             - name: Copy files via SSH
               run: |
-                scp -i ~/.ssh/id_rsa sites/trainer/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/trainer
+                scp -i ~/.ssh/id_rsa sites/utsav/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/utsav
