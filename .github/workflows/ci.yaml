@@ -1,0 +1,23 @@
+name: Deploy Static Website
+
+on:
+  push:
+    branches:
+      - feature/yubin
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v1
+        with:
+          host: eef1df54591c.mylabserver.com
+          username: root
+          key: ${{ secrets.YUBIN_SSH_KEY }}
+          source: "sites/yubin/index.html"
+          target: /var/www/html/yubin/
