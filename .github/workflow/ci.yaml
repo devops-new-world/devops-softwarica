@@ -22,4 +22,5 @@ jobs:
           key: ${{ secrets.PRAYUG}}
           source: "sites/prayug/index.html"
           target: /var/www/html/prayug/
+
           
