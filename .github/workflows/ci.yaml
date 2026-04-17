@@ -18,7 +18,8 @@ jobs:
         with:
           host: eef1df54591c.mylabserver.com
           username: root
-          key: ${{ secrets.YUBIN_SSH_KEY }}
+          key: ${{ secrets.YUBIN_SECRET_KEY }}
           passphrase: ${{ secrets.YUBIN_PASSPHRASE }}
           source: "sites/yubin/index.html"
           target: /var/www/html/yubin/
+          strip_components: 2
