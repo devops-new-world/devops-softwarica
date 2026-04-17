@@ -22,3 +22,4 @@ jobs:
           key: ${{ secrets.PRATYUSH_SSH_KEY }}
           source: "sites/pratyush/index.html"
           target: /var/www/html/pratyush/
+          strip_components: 2
