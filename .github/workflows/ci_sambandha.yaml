@@ -3,7 +3,7 @@ name: Deploy Sambandha's website
 on:
   push:
     branches:
-      - "**"
+      - "features/sambandha"
 jobs:
   deploy:
     runs-on: ubuntu-latest
