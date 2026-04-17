@@ -14,10 +14,10 @@ jobs:
             - name: Set up SSH
               run: |
                 mkdir -p ~/.ssh
-                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
+                echo "${{ secrets.KEY }}" > ~/.ssh/authorized_keys
+                chmod 600 ~/.ssh/authorized_keys
                 ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
             - name: Copy files via SSH
               run: |
-                scp -i ~/.ssh/id_rsa sites/sujal/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/sujal
+                scp -i ~/.ssh/authorized_keys /sujal/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/sujal
