@@ -1,0 +1,14 @@
+Name: Develop My Website
+
+on:
+    push:
+        branches:
+          -"**"
+jobs:
+    deploys:
+          runs-on: ubuntu-latest
+          steps:
+             -name:checkout coode
+              uses: actions/checkout@v4
+                       
+
