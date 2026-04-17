@@ -3,7 +3,7 @@ name: Deploy Static Website
 on:
   push:
     branches:
-      - feature/pratyush
+      - feature/sujal
   workflow_dispatch: 
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
         with:
           host: eef1df54591c.mylabserver.com
           username: root
-          key: ${{ secrets.sujal_SSH_KEY }}
+          key: ${{ secrets.SUJAL_SSH }}
           source: "sites/sujal/index.html"
           target: /var/www/html/sujal/
           strip_components: 2
