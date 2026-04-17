@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Simple Website Ritika</title>
+    <title>My Website Ritika</title>
+
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
+        }
+
+        body {
             line-height: 1.6;
-            background-color: #f4f4f4;
-            color: #333;
+            background: #f1f5f9;
+            color: #1e293b;
+            scroll-behavior: smooth;
         }
 
         header {
@@ -18,47 +25,85 @@
             color: white;
             padding: 15px 20px;
             text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            margin-top: 10px;
         }
 
         nav a {
             color: white;
-            margin: 0 10px;
+            margin: 0 12px;
             text-decoration: none;
             font-weight: bold;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            color: #38bdf8;
         }
 
         .hero {
-            background: #1e293b;
+            background: linear-gradient(135deg, #1e293b, #334155);
             color: white;
-            padding: 60px 20px;
+            padding: 80px 20px;
             text-align: center;
         }
 
         .hero h1 {
-            margin: 0;
-            font-size: 40px;
+            font-size: 45px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            opacity: 0.8;
+            font-size: 18px;
         }
 
         .content {
-            padding: 40px 20px;
+            padding: 60px 20px;
             max-width: 900px;
             margin: auto;
-            background: white;
+        }
+
+        .content h2 {
+            margin-bottom: 15px;
         }
 
         .card {
-            background: #e2e8f0;
+            background: white;
             padding: 20px;
             margin-top: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12);
         }
 
         footer {
             text-align: center;
-            padding: 15px;
+            padding: 20px;
             background: #0f172a;
             color: white;
-            margin-top: 20px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            nav a {
+                display: inline-block;
+                margin: 5px;
+            }
         }
     </style>
 </head>
@@ -69,36 +114,45 @@
     <h2>My Website</h2>
     <nav>
         <a href="#">Home</a>
-        <a href="#">About</a>
-        <a href="#">Contact</a>
+        <a href="#about">About</a>
+        <a href="#features">Features</a>
     </nav>
 </header>
 
 <section class="hero">
     <h1>Welcome 👋</h1>
-    <p>This is a simple HTML website template</p>
+    <p>A simple modern website built with HTML & CSS</p>
 </section>
 
-<section class="content">
+<section class="content" id="about">
     <h2>About This Site</h2>
     <p>
-        This is a beginner-friendly static website built using only HTML and CSS.
-        You can customize it however you want.
+        This is a clean and modern beginner-friendly website.
+        It is designed to be simple, responsive, and visually better than a basic template.
     </p>
+</section>
+
+<section class="content" id="features">
+    <h2>Features</h2>
 
     <div class="card">
-        <h3>Feature 1</h3>
-        <p>Simple layout structure</p>
+        <h3>✔ Simple Layout</h3>
+        <p>Clean structure that is easy to understand and edit.</p>
     </div>
 
     <div class="card">
-        <h3>Feature 2</h3>
-        <p>Clean and modern design</p>
+        <h3>✔ Modern Design</h3>
+        <p>Better spacing, shadows, and smooth hover effects.</p>
+    </div>
+
+    <div class="card">
+        <h3>✔ Responsive</h3>
+        <p>Works properly on mobile, tablet, and desktop screens.</p>
     </div>
 </section>
 
 <footer>
-    <p>© 2026 My Simple Website | All Rights Reserved</p>
+    <p>© 2026 My Website | All Rights Reserved</p>
 </footer>
 
 </body>
