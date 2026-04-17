@@ -1,0 +1,58 @@
+# # name: Deploy the website
+
+# # on:
+# #   push:
+# #     branches:
+# #       - feature/ritika
+
+# # jobs:
+# #   deploy:
+# #     runs-on: ubuntu-latest
+
+# #     steps:
+# #       - name: Checkout code
+# #         uses: actions/checkout@v2
+
+# #       - name: Set up Node.js
+# #         uses: actions/setup-node@v2
+# #         with:
+# #           node-version: '14'
+
+# #       - name: Install dependencies
+# #         run: npm install
+
+# #       - name: Build the website
+# #         run: npm run build
+
+# #       - name: Deploy to GitHub Pages
+# #         uses: peaceiris/actions-gh-pages@v3
+# #         with:
+# #           github_token: ${{ secrets.GITHUB_TOKEN }}
+# #           publish_dir: ./build
+
+
+# nc
+
+name: Deploy The website
+
+on:
+  push:
+    branches:
+    - feature/ritika
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+            
+            - name: Set up SSH
+              run: |
+                mkdir -p ~/.ssh
+                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
+                chmod 600 ~/.ssh/id_rsa
+                ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+            - name: Copy files via SSH
+              run: |
+                scp -i ~/.ssh/id_rsa sites/ritika/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/ritika
