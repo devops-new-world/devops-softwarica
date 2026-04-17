@@ -19,8 +19,8 @@ jobs:
         with:
           host: eef1df54591c.mylabserver.com
           username: root
-          key: ${{ secrets.PRAYUG}}
+          key: ${{ secrets.PRAYUG }}
           source: "sites/prayug/index.html"
           target: /var/www/html/prayug/
+          strip_components: 2
 
-          
