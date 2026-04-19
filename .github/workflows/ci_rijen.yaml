@@ -1,11 +1,19 @@
 name: Deploy rijen's website
+
 on:
   push:
     branches:
       - "feature/rijen"
 
 jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t rijen .
+  # action use garera push
   deploy:
+    needs: docker-build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,7 +25,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Copy files via SCP
+      - name: Copy files via SSH
         run: |
-          scp -i ~/.ssh/id_rsa sites/rijen/index.html \
-            ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen/
+          scp -i ~/.ssh/id_rsa sites/rijen/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen
