@@ -14,7 +14,7 @@ jobs:
 
       - name: docker build
         run: |
-          docker build -t yubin -f /home/yubin/sites/yubin/Dockerfile .
+          docker build -t yubin -f ./sites/yubin/Dockerfile .
 
   deploy:
     runs-on: ubuntu-latest
