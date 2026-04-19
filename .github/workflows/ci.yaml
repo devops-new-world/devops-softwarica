@@ -3,7 +3,9 @@ name: Deploy My website
 on:
   push:
     branches:
-    - "**"
+    - "trainer"
+    - "feature/trainer"
+  workflow_dispatch:
 jobs:
     deploy:
         runs-on: ubuntu-latest
