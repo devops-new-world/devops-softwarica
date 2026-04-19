@@ -1,3 +1,3 @@
 FROM nginx:latest
 
-COPY index.html /usr/share/nginx/html/index.html
+COPY sites/rijen/index.html /usr/share/nginx/html/index.html
