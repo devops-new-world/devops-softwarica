@@ -5,15 +5,15 @@ on:
     branches:
     - "main"
 jobs:
-    docker-build:
+  docker-build:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout code
-      uses: actions/checkout@v4
-    - name: docker build
-      run: |
-        docker build -t diwas .
-    deploy:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: docker build
+        run: |
+          docker build -t diwas .
+  deploy:
         runs-on: ubuntu-latest
         steps:
             - name: checkout code
