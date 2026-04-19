@@ -1,4 +1,4 @@
 from nginx:latest
 
-COPY index.html /usr/share/nginx/html/index.html
+COPY sites/yubin/index.html /usr/share/nginx/html/index.html
 
