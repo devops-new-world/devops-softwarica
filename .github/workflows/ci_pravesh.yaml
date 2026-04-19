@@ -37,4 +37,5 @@ jobs:
           key: ${{ secrets.PRAVESH }}
           port: 22
           source: "sites/pravesh/index.html"
+          strip_components: 2
           target: "/var/www/html/pravesh/"
