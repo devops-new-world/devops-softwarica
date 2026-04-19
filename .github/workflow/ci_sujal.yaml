@@ -25,7 +25,7 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.KEY }}" > ~/.ssh/SUJAL_SSH
+          echo "${{ secrets.SUJAL_SSH }}" > ~/.ssh/SUJAL_SSH
           chmod 600 ~/.ssh/SUJAL_SSH
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
