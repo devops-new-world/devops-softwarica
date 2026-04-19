@@ -5,6 +5,16 @@ on:
     branches:
       - "features/sambandha"
 jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: docker build
+        run: |
+          docker build -t sambandha .
+
   deploy:
     runs-on: ubuntu-latest
     steps:
@@ -20,4 +30,4 @@ jobs:
 
       - name: Copy files via SSH
         run: |
-          scp -i ~/.ssh/id_rsa sites/sambandha/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/sambandha
+          scp -i ~/.ssh/id_rsa sites/sambandha/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/trainer
