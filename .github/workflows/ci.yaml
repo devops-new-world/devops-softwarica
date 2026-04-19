@@ -6,6 +6,17 @@ on:
       - feature/yubin
 
 jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: docker build
+        run: |
+          docker build -t yubin .
+
+jobs:
   deploy:
     runs-on: ubuntu-latest
 
