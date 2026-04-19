@@ -6,32 +6,42 @@ on:
       - feature/ritika
 
 jobs:
-  docker-build:
+  build:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Docker build
+      # 2. Show files (debug step)
+      - name: List files
+        run: ls -la
+
+      # 3. Docker build
+      - name: Build Docker image
         run: |
           docker build -t trainer .
 
   deploy:
     runs-on: ubuntu-latest
-    needs: docker-build
+    needs: build   # run only after build success
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up SSH
+      # 2. Setup SSH
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Copy files via SSH
+      # 3. Deploy files via SCP
+      - name: Deploy to server
         run: |
-          scp -i ~/.ssh/id_rsa sites/ritika/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/ritika
+          scp -i ~/.ssh/id_rsa -r sites/ritika/index.html \
+          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/ritika
