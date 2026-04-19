@@ -10,7 +10,7 @@ jobs:
         steps:
           - name: checkout code
             uses: actions/checkout@v4
-          - name: Build Docker Image
+          - name: docker build
             run: |
               docker build -t pravesh:latest .
     deploy:
