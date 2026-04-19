@@ -3,23 +3,22 @@ name: Deploy My website
 on:
   push:
     branches:
-    - "feature/pravesh"
+      - "feature/pravesh"
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-
+  deploy:
+    runs-on: ubuntu-latest
     steps:
-        - name: checkout code
-          uses: actions/checkout@v4        
-        - name : copy files va SSH
-          uses : appleboy/scp-action@v1
-          with:
-            host : ${{ secrets.HOST }}
-            username : pravesh
-            key : ${{ secrets.PRAVESH }}
-            # port : 22
-            source : "sites/pravesh/index.html"
-            target : "/var/www/html/pravesh/" 
-        # - name: Copy files via SSH
-        #   run: |
-        #     scp -i ~/.ssh/id_rsa sites/pravesh/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/pravesh
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: copy files via SSH
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: pravesh
+          key: ${{ secrets.PRAVESH }}
+          # port: 22
+          source: "sites/pravesh/index.html"
+          target: "/var/www/html/pravesh/"
+      # - name: Copy files via SSH
+      #   run: |
+      #     scp -i ~/.ssh/id_rsa sites/pravesh/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/pravesh
