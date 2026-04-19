@@ -3,7 +3,7 @@ name: Deploy rijen's website
 on:
   push:
     branches:
-      - "features/rijen"
+      - "feature/rijen"
 jobs:
   docker-build:
     runs-on: ubuntu-latest
