@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - "rohan"
+    - "feature/rohan"
 jobs:
     docker-build:
         runs-on: ubuntu-Latest
@@ -13,9 +14,10 @@ jobs:
             
             - name: Build Docker image
               run: |
-                docker build -t rohan .
+                docker build -t rohan -f sites/rohan/Dockerfile sites/rohan
         
     deploy:
+        needs: docker-build
         runs-on: ubuntu-latest
         steps:
             - name: checkout code
