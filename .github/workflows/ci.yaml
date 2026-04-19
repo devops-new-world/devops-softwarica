@@ -1,16 +1,24 @@
-Name: Develop My Website
+name: docker-build
 
 on:
-    push:
-        branches:
-          -"**"
-jobs:
-    docker-build:
-      runs-on:ubuntu-latest
-    deploys:
-          runs-on: ubuntu-latest
-          steps:
-             -name:checkout coode
-              uses: actions/checkout@v4
-                       
+  push:
+    branches:
+      - feature1/**
 
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check folder structure
+        run: |
+          if [ ! -f "sites/abhishekdh/index.html" ]; then
+            echo "Required file not found!"
+            exit 1
+          fi
+
+      - name: Docker Build Step
+        run: echo "docker-build"
