@@ -22,3 +22,10 @@ jobs:
 
       - name: Build Docker Image
         run: docker build -t my-site .
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Simulate Deploy
+        run: echo "Deploy stage - no actual deployment"
