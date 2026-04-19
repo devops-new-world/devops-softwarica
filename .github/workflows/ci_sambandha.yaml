@@ -12,8 +12,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker Image
-        working-directory: sites
-        run: docker build -t my-site .
+        working-directory: sites/sambandha
+        run: docker build -t my_site_sambandha .
 
   deploy:
     runs-on: ubuntu-latest
