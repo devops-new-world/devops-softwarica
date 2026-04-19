@@ -12,7 +12,7 @@ jobs:
           uses: actions/checkout@v4
         - name: docker build
           run: |
-            docker build -t deepa .
+            docker build -t deepa -f sites/deepa/Dockerfile .
     deploy:
         runs-on: ubuntu-latest
         steps:
