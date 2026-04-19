@@ -15,8 +15,7 @@ jobs:
       - name: docker build
         run: |
           docker build -t yubin .
-
-jobs:
+          
   deploy:
     runs-on: ubuntu-latest
 
