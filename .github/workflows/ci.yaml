@@ -21,4 +21,4 @@ jobs:
 
       - name: Copy files via SSH
         run: |
-          scp -i ~/.ssh/id_rsa sites/trainer/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/trainer
+          scp -i ~/.ssh/id_rsa sites/sujal/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/sujal
