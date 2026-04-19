@@ -11,9 +11,9 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
 
-      - name: docker build
-        run: |
-          docker build -t sambandha .
+      - name: Build Docker Image
+        working-directory: sites
+        run: docker build -t my-site .
 
   deploy:
     runs-on: ubuntu-latest
