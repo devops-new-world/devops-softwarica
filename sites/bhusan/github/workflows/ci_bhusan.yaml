@@ -1,4 +1,4 @@
-Name: Deploy my website
+Name: Deploy my Website
 
 on:
   push:
@@ -13,4 +13,5 @@ jobs:
     -name: docker build
       run: |
         docker build -t bhusan .
+
 
