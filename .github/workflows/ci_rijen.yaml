@@ -40,3 +40,6 @@ jobs:
         run: |
           scp -i ~/.ssh/id_rsa sites/rijen/index.html \
             ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen/
+
+      - name: Test SSH
+        run: ssh -i ~/.ssh/id_rsa rijen@${{ secrets.HOST }} "echo OK"
