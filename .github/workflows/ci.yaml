@@ -31,8 +31,8 @@ jobs:
 
       - name: Push to Docker Hub
         run: |
-          docker tag yubin your-dockerhub/yubin:latest
-          docker push your-dockerhub/yubin:latest
+          # docker tag yubin your-dockerhub/yubin:latest
+          docker push yustha/devops:0.1.0
 
   deploy:
     runs-on: ubuntu-latest
