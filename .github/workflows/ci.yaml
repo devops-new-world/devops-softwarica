@@ -20,7 +20,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t prayug1/devops-class:latest .
+          docker build -t ./sites/prayug/Dockerfile .
           docker push prayug1/devops-class:latest
 
   deploy:
