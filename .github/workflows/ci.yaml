@@ -34,11 +34,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      - name: Test SSH connectivity
-        run: |
-          ssh -i ~/.ssh/id_rsa -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "$SSH_USER@$SSH_HOST" "echo SSH connection successful"
-
       - name: Copy files via SSH
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new sites/trainer/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/index.html"
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new sites/trainer/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH"
