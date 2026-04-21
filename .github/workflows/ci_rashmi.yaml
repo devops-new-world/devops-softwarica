@@ -5,7 +5,7 @@ on:
     branches:
     - "features/rashmi"
 jobs:   
-  docker build and push:
+  docker_build_and_push:
     runs-on: ubuntu-latest
     steps: 
       - name: checkout code 
