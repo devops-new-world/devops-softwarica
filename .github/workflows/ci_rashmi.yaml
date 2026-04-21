@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - "features/rashmi"
+
 jobs:
   docker_build_and_push:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
@@ -26,8 +27,8 @@ jobs:
     needs: docker_build_and_push
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
-        uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
