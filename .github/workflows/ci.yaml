@@ -14,13 +14,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        run: |
+          echo "${{ secrets.ABHISHEK_DOCKER_TOKEN }}" | docker login -u "${{ secrets.ABHISHEK_DOCKER_USERNAME }}" --password-stdin
 
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/mysite_abhishek:latest .
+        run: docker build -t ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/mysite_abhishek:latest .
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/mysite_abhishek:latest
+        run: docker push ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/mysite_abhishek:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -29,7 +30,7 @@ jobs:
     steps:
       - name: Deploy (simulation)
         run: |
-          docker pull ${{ secrets.DOCKER_USERNAME }}/mysite_abhishek:latest
+          docker pull ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/mysite_abhishek:latest
           docker stop mysite || true
           docker rm mysite || true
-          docker run -d -p 8080:80 --name mysite ${{ secrets.DOCKER_USERNAME }}/mysite_abhishek:latest
+          docker run -d -p 8080:80 --name mysite ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/mysite_abhishek:latest
