@@ -20,7 +20,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME_D }}/devops-class:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME_D }}/devops-class:latest -f sites/deepa/Dockerfile sites/deepa
           docker push ${{ secrets.DOCKER_USERNAME_D }}/devops-class:latest
 
   deploy:
@@ -39,5 +39,3 @@ jobs:
           source: "sites/deepa/index.html"
           target: /var/www/html/deepa/
           strip_components: 2
-
-# 
