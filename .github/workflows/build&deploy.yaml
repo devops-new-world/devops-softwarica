@@ -1,0 +1,51 @@
+name: Deploy Static Website
+
+on:
+  push:
+    branches:
+      - feature/pratyush
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: docker build
+        run: |
+          docker build -t pratyush -f /home/pratyush/devops-site/Dockerfile .
+    
+  docker-hub-push:
+    needs: docker-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: yustha
+          password: ${{ secrets.PRATYUSH_DOCKER_KEY }}
+
+      - name: Push to Docker Hub
+        run: |
+          docker push neocancode/devops-class:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v1
+        with:
+          host: eef1df54591c.mylabserver.com
+          username: root
+          key: ${{ secrets.PRATYUSH_SSH_KEY}}
+          source: "sites/pratyush/index.html"
+          target: /var/www/html/pratyush/
+          strip_components: 2
