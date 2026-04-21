@@ -1,38 +1,41 @@
-deploy:
-  runs-on: ubuntu-latest
-  needs: docker-build
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+name: Deploy Sujal Website
 
-    - name: Set up SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SUJAL_SSH }}" > ~/.ssh/SUJAL_SSH
-        chmod 600 ~/.ssh/SUJAL_SSH
-        ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-        chmod 644 ~/.ssh/known_hosts
+on:
+  push:
+    branches:
+      - "**"
 
-    - name: Debug SSH key
-      run: |
-        echo "Key file size:"
-        wc -c ~/.ssh/SUJAL_SSH
-        echo "First line of key:"
-        head -1 ~/.ssh/SUJAL_SSH
-        echo "Last line of key:"
-        tail -1 ~/.ssh/SUJAL_SSH
+permissions:
+  contents: read
 
-    - name: Test SSH connection
-      run: |
-        ssh -i ~/.ssh/SUJAL_SSH \
-          -o StrictHostKeyChecking=no \
-          -o PasswordAuthentication=no \
-          -v \
-          ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH works!"
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Copy files via SSH
-      run: |
-        scp -i ~/.ssh/SUJAL_SSH \
-          -o StrictHostKeyChecking=no \
-          sites/sujal/index.html \
-          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/sujal/
+      - name: Build Docker Image
+        run: |
+          docker build -t sujal .
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SUJAL_SSH }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Copy files via SSH
+        run: |
+          scp -o StrictHostKeyChecking=no \
+            sites/sujal/index.html \
+            ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/sujal/
