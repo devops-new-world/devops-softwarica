@@ -3,30 +3,42 @@ name: Deploy My website
 on:
   push:
     branches:
-    - "**"
+      - "**"
 jobs:
-    docker-build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: checkout code
-              uses: actions/checkout@v4
-            
-            - name: docker build 
-              run: |
-                docker build -t aruna .
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - name: checkout code
-              uses: actions/checkout@v4
-            
-            - name: Set up SSH
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+  docker_build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
 
-            - name: Copy files via SSH
-              run: |
-                scp -i ~/.ssh/id_rsa sites/aruna/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/aruna 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}
+          password: ${{ secrets.DOCKERHUB_TOKEN_ARUNA }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./sites/aruna
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest
+
+  deploy:
+    needs: docker_build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.12.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest
+            docker stop aruna-site || true
+            docker rm aruna-site || true
+            docker run -d --name aruna-site -p 80:80 ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest 
