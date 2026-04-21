@@ -5,15 +5,24 @@ on:
     branches:
       - "features/sambandha"
 jobs:
-  docker-build:
+  docker-build and push:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker Image
-        working-directory: sites/sambandha
-        run: docker build -t my_site_sambandha .
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}
+          password: ${{ secrets.SAMBANDHA_DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./sites/sambandha
+          push: true
+          tags: ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/my-site-sambandha:latest
 
   deploy:
     runs-on: ubuntu-latest
