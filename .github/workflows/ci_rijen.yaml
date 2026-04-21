@@ -20,8 +20,8 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t rezenn/devops-class:latest .
-          docker push rezenn/devops-class:latest
+          docker build -t rezenn/rijen:latest .
+          docker push rezenn/rijen:latest
 
   deploy:
     needs: docker-build-and-push
