@@ -34,7 +34,7 @@ jobs:
         uses: appleboy/scp-action@v1
         with:
           host: eef1df54591c.mylabserver.com
-          username: root
+          username: ${{ secrets.PRATYUSH_SERVER_USERNAME }}
           key: ${{ secrets.PRATYUSH_SSH_KEY}}
           source: "sites/pratyush/index.html"
           target: /var/www/html/pratyush/
