@@ -8,6 +8,7 @@ on:
 jobs:
   docker-build-and-push:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -18,28 +19,39 @@ jobs:
           username: rezenn
           password: ${{ secrets.RIJEN_DOCKER_TOKEN }}
 
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t rezenn/rijen:latest .
-          docker push rezenn/rijen:latest
+      - name: Build Docker Image
+        run: docker build -t rezenn/rijen:latest .
+
+      - name: Push Docker Image
+        run: docker push rezenn/rijen:latest
 
   deploy:
     needs: docker-build-and-push
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.RIJEN_SECRET }}" > ~/.ssh/id_rsa
+
+          # write private key safely (prevents formatting issues)
+          printf "%s" "${{ secrets.RIJEN_SECRET }}" > ~/.ssh/id_rsa
+
           chmod 600 ~/.ssh/id_rsa
+
+          # trust server
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+      - name: Test SSH Connection
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
+          ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH OK"
 
       - name: Copy files via SCP
         run: |
-          scp -i ~/.ssh/id_rsa sites/rijen/index.html \
-            ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen/
-
-      - name: Test SSH
-        run: ssh -i ~/.ssh/id_rsa rijen@${{ secrets.HOST }} "echo OK"
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
+          sites/rijen/index.html \
+          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen/
