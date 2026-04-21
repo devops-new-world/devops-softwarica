@@ -18,7 +18,7 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: sujal
+          username: sujalneupane
           password: ${{ secrets.SUJAL_DOCKER_KEY }}
 
       - name: Build and Push Docker Image
