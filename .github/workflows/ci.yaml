@@ -1,4 +1,4 @@
-name: docker-build
+name: docker-ci-cd
 
 on:
   push:
@@ -6,26 +6,30 @@ on:
       - feature1/**
 
 jobs:
-  docker-build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Verify structure
-        run: |
-          if [ ! -f "sites/abhishekdh/index.html" ]; then
-            echo "Missing index.html"
-            exit 1
-          fi
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
       - name: Build Docker Image
-        run: docker build -t my-site .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/mysite_abhishek:latest .
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/mysite_abhishek:latest
 
   deploy:
     runs-on: ubuntu-latest
+    needs: build-and-push
 
     steps:
-      - name: Simulate Deploy
-        run: echo "Deploy stage - no actual deployment"
+      - name: Deploy (simulation)
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/mysite_abhishek:latest
+          docker stop mysite || true
+          docker rm mysite || true
+          docker run -d -p 8080:80 --name mysite ${{ secrets.DOCKER_USERNAME }}/mysite_abhishek:latest
