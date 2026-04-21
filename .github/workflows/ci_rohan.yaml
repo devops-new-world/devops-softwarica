@@ -70,4 +70,5 @@ jobs:
 
       - name: Copy files via SSH
         run: |
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new sites/rohan/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH"
+          SCP_OPTS="-o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -o PreferredAuthentications=publickey -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostkeyAlgorithms=+ssh-rsa"
+          scp -i ~/.ssh/id_rsa $SCP_OPTS sites/rohan/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH"
