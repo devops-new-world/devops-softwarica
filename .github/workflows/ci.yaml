@@ -1,37 +1,41 @@
-name: Deploy Static Website
+name: Docker build & deploy
 
 on:
   push:
     branches:
       - feature/prayug
-  workflow_dispatch:
 
 jobs:
-  docker-build:
+  docker-build-and-push:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Docker build
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: neocancode
+          password: ${{ secrets.PRAYUG_DOCKER_KEY }}
+
+      - name: Build and Push Docker Image
         run: |
-          docker build -t /home/kali/devops-softwarica/sites/prayug .
+          docker build -t prayug1/devops-class:latest .
+          docker push prayug1/devops-class:latest
 
   deploy:
+    needs: docker-build-and-push
     runs-on: ubuntu-latest
-    needs: docker-build
-
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
-
+        
       - name: Copy files via SSH
         uses: appleboy/scp-action@v1
         with:
           host: eef1df54591c.mylabserver.com
-          username: root
-          key: ${{ secrets.PRAYUG }}
+          username: ${{ secrets.PRAYUG_USERNAME }}
+          key: ${{ secrets.PRAYUG_SSH_KEY}}
           source: "sites/prayug/index.html"
           target: /var/www/html/prayug/
           strip_components: 2
