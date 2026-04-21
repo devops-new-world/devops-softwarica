@@ -30,6 +30,7 @@ jobs:
       SSH_HOST: ${{ secrets.HOST }}
       SSH_USER: ${{ secrets.USERNAME }}
       SSH_KEY: ${{ secrets.KEY }}
+      SSH_PASSWORD: ${{ secrets.PASSWORD }}
       DEPLOY_PATH: /var/www/html/rohan
     steps:
       - name: Checkout code
@@ -37,12 +38,18 @@ jobs:
 
       - name: Validate required secrets
         run: |
-          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ] || [ -z "$SSH_KEY" ]; then
-            echo "Missing one or more required secrets: HOST, USERNAME, KEY"
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ]; then
+            echo "Missing required secrets: HOST and/or USERNAME"
+            exit 1
+          fi
+
+          if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
+            echo "Provide at least one authentication secret: KEY (preferred) or PASSWORD"
             exit 1
           fi
 
       - name: Set up SSH
+        if: ${{ env.SSH_KEY != '' }}
         run: |
           install -m 700 -d ~/.ssh
           KEY_CONTENT="$SSH_KEY"
@@ -70,5 +77,18 @@ jobs:
 
       - name: Copy files via SSH
         run: |
-          SCP_OPTS="-o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -o PreferredAuthentications=publickey -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostkeyAlgorithms=+ssh-rsa"
-          scp -i ~/.ssh/id_rsa $SCP_OPTS sites/rohan/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH"
+          SCP_OPTS="-o StrictHostKeyChecking=accept-new -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostkeyAlgorithms=+ssh-rsa"
+
+          if [ -n "$SSH_KEY" ]; then
+            scp -i ~/.ssh/id_rsa -o IdentitiesOnly=yes -o PreferredAuthentications=publickey $SCP_OPTS sites/rohan/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH" && exit 0
+            echo "Key-based auth failed, attempting password fallback if PASSWORD secret is set..."
+          fi
+
+          if [ -n "$SSH_PASSWORD" ]; then
+            sudo apt-get update -y
+            sudo apt-get install -y sshpass
+            sshpass -p "$SSH_PASSWORD" scp $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no sites/rohan/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH" && exit 0
+          fi
+
+          echo "Deployment failed: authentication unsuccessful. Verify KEY matches USERNAME@HOST, or set PASSWORD secret."
+          exit 1
