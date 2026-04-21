@@ -3,7 +3,7 @@ name: Deploy My website
 on:
   push:
     branches:
-      - "features/rashmi"
+      "features/rashmi"
 
 jobs:
   docker_build_and_push:
