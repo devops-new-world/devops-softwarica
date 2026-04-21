@@ -48,10 +48,10 @@ jobs:
       - name: Test SSH Connection
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-          ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH OK"
+          rijen@${{ secrets.HOST }} "echo SSH OK"
 
       - name: Copy files via SCP
         run: |
           scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
           sites/rijen/index.html \
-          ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen/
+          rijen@${{ secrets.HOST }}:/var/www/html/rijen/
