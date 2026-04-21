@@ -15,8 +15,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker Image
-        run: docker build -t sujal .
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: sujal
+          password: ${{ secrets.SUJAL_DOCKER_KEY }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t sujalneupane/devops-class:latest .
+          docker push sujalneupane/devops-class:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -34,8 +42,16 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
+      - name: Test SSH connection
+        run: |
+          ssh -vvv -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=no \
+            ${{ secrets.USERNAME }}@${{ secrets.HOST }} \
+            "echo SSH_CONNECTION_SUCCESS"
+
       - name: Copy files via SSH
         run: |
-          scp -o StrictHostKeyChecking=no \
+          scp -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=no \
             sites/sujal/index.html \
             ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/sujal/
