@@ -1,25 +1,44 @@
-name: Deploy My website
+name: Deploy Trainer Website
 
 on:
   push:
     branches:
-    - "trainer"
-    - "feature/trainer"
+      - "trainer"
+      - "feature/trainer"
   workflow_dispatch:
-jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - name: checkout code
-              uses: actions/checkout@v4
-            
-            - name: Set up SSH
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
-            - name: Copy files via SSH
-              run: |
-                scp -i ~/.ssh/id_rsa sites/trainer/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/trainer
+jobs:
+  deploy:
+    name: Deploy trainer website
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.HOST }}
+      SSH_USER: ${{ secrets.USERNAME }}
+      SSH_KEY: ${{ secrets.KEY }}
+      DEPLOY_PATH: /var/www/html/trainer
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Validate required secrets
+        run: |
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ] || [ -z "$SSH_KEY" ]; then
+            echo "Missing one or more required secrets: HOST, USERNAME, KEY"
+            exit 1
+          fi
+
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Test SSH connectivity
+        run: |
+          ssh -i ~/.ssh/id_rsa -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "$SSH_USER@$SSH_HOST" "echo SSH connection successful"
+
+      - name: Copy files via SSH
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=accept-new sites/trainer/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/index.html"
