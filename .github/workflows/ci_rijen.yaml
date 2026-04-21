@@ -20,6 +20,7 @@ jobs:
       - name: Push to Docker Hub
         run: docker push rezenn/rijen:latest
 
+
   deploy:
     needs: docker-build
     runs-on: ubuntu-latestss
