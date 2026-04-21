@@ -14,8 +14,9 @@ jobs:
             - name: Set up SSH
               run: |
                 mkdir -p ~/.ssh
-                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
+                printf '%s' "${{ secrets.KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
                 chmod 600 ~/.ssh/id_rsa
+                ssh-keygen -y -f ~/.ssh/id_rsa >/dev/null
                 ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
             - name: Copy files via SSH
