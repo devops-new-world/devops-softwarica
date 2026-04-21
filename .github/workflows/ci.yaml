@@ -15,7 +15,7 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: neocancode
+          username: prayug1
           password: ${{ secrets.PRAYUG_DOCKER_KEY }}
 
       - name: Build and Push Docker Image
