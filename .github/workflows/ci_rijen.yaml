@@ -10,11 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: docker build -t rijen .
-  # action use garera push
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.RIJEN_DOCKER_TOKEN }}" | docker login -u rezenn --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t rezenn/rijen:latest .
+
+      - name: Push to Docker Hub
+        run: docker push rezenn/rijen:latest
+
   deploy:
     needs: docker-build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latestss
     steps:
       - uses: actions/checkout@v4
 
@@ -25,6 +33,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Copy files via SSH
+      - name: Copy files via SCP
         run: |
-          scp -i ~/.ssh/id_rsa sites/rijen/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen
+          scp -i ~/.ssh/id_rsa sites/rijen/index.html \
+            ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/rijen/
