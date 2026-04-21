@@ -6,7 +6,7 @@ on:
       - feature/yubin
 
 jobs:
-  docker-build:
+  docker-build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -31,8 +31,7 @@ jobs:
 
       - name: Push to Docker Hub
         run: |
-          # docker tag yubin your-dockerhub/yubin:latest
-          docker push yustha/devops:0.1.0
+          docker push yustha/devops-class:0.1.0
 
   deploy:
     runs-on: ubuntu-latest
