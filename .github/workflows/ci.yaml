@@ -27,13 +27,9 @@ jobs:
                 push: true
                 tags: ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest
             
-            - name: Set up SSH
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+            - name: Install sshpass
+              run: sudo apt-get update && sudo apt-get install -y sshpass
 
-            - name: Copy files via SSH
+            - name: Copy files via SSH with password
               run: |
-                scp -i ~/.ssh/id_rsa sites/trainer/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/trainer
+                sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no sites/aruna/index.html ${{ secrets.USERNAME1 }}@${{ secrets.HOST1 }}:/var/www/html/aruna
