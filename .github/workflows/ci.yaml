@@ -18,6 +18,10 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
+      - name: Test SSH connection
+        run: |
+          ssh -i ~/.ssh/id_rsa -o BatchMode=yes ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'whoami && hostname && ls -ld /var/www/html/pravesh'
+
       - name: Copy files via SSH
         run: |
           scp -i ~/.ssh/id_rsa sites/pravesh/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/pravesh
