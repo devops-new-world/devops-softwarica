@@ -6,7 +6,7 @@ on:
       - feature/yubin
 
 jobs:
-  docker-build-and-push:
+  docker-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -16,7 +16,7 @@ jobs:
         run: |
           docker build -t yubin -f ./sites/yubin/Dockerfile .
     
-    
+
   docker-hub-push:
     needs: docker-build
     runs-on: ubuntu-latest
