@@ -24,7 +24,7 @@ jobs:
           docker push rezenn/devops-class:latest
 
   deploy:
-    needs: docker-build
+    needs: docker-build-and-push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
