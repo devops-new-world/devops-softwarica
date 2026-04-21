@@ -1,31 +1,50 @@
-name: Deploy My website
+name: Docker build & deploy (Ritika)
 
 on:
   push:
     branches:
-    - "feature/ritika"
-jobs:
-    docker-build:
-      runs-on: ubuntu-latest
-      steps:
-        - name: checkout code
-          uses: actions/checkout@v4
-        - name: docker build
-          run: |
-            docker build -t trainer .
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - name: checkout code
-              uses: actions/checkout@v4
-            
-            - name: Set up SSH
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+      - feature/ritika
 
-            - name: Copy files via SSH
-              run: |
-                scp -i ~/.ssh/id_rsa sites/ritika/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/ritika
+jobs:
+  docker-build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devops-class:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops-class:latest
+
+  deploy:
+    needs: docker-build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          source: "sites/ritika/index.html"
+          target: /var/www/html/ritika/
+          strip_components: 2
