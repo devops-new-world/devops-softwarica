@@ -18,25 +18,25 @@ jobs:
           password: ${{ secrets.SAMBANDHA_DOCKERHUB_TOKEN }}
 
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./sites/sambandha
-          push: true
-          tags: ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/my-site-sambandha:latest
+        run: |
+          docker build -t ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/my-site-sambandha:latest ./sites/sambandha
+          docker push ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/my-site-sambandha:latest
 
   deploy:
+    needs: docker_build_and_push
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
         uses: actions/checkout@v5
 
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-
-      - name: Copy files via SSH
-        run: |
-          scp -i ~/.ssh/id_rsa sites/sambandha/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/trainer
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: eef1df54591c.mylabserver.com
+          username: ${{ secrets.SAMBANDHA_SERVER_USERNAME }}
+          key: ${{ secrets.SAMBANDHA_SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/my-site-sambandha:latest
+            docker stop sambandha-site || true
+            docker rm sambandha-site || true
+            docker run -d --name sambandha-site -p 9090:80 ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/my-site-sambandha:latest
