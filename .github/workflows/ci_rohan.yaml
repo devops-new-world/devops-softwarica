@@ -1,10 +1,11 @@
-name: Deploy Rohan Website
+name: Build and Deploy Rohan Website
 
 on:
   push:
     branches:
       - "rohan"
       - "feature/rohan"
+      - "bench_topper"
   workflow_dispatch:
 
 jobs:
@@ -22,6 +23,12 @@ jobs:
         run: |
           docker build -t rohan -f sites/rohan/Dockerfile sites/rohan
 
+      - name: Upload built site
+        uses: actions/upload-artifact@v4
+        with:
+          name: rohan-site
+          path: sites/rohan/index.html
+
   deploy:
     name: Deploy rohan website
     runs-on: ubuntu-latest
@@ -34,6 +41,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+
+      - name: Download built site
+        uses: actions/download-artifact@v4
+        with:
+          name: rohan-site
+          path: deploy
 
       - name: Validate required secrets
         run: |
@@ -53,4 +66,4 @@ jobs:
 
           sudo apt-get update -y
           sudo apt-get install -y sshpass
-          sshpass -p "$SSH_PASSWORD" scp $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no sites/rohan/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH"
+          sshpass -p "$SSH_PASSWORD" scp $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no deploy/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH"

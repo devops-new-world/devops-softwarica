@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps Project Hub</title>
+
+<style>
+    :root {
+        --bg-start: #1f4037;
+        --bg-end: #99f2c8;
+        --surface: rgba(255, 255, 255, 0.94);
+        --text: #1f2937;
+        --muted: #5b6472;
+        --primary: #1f4037;
+        --primary-hover: #145c4a;
+        --shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background:
+            radial-gradient(circle at top, rgba(255, 255, 255, 0.16), transparent 34%),
+            linear-gradient(135deg, var(--bg-start), var(--bg-end));
+        color: var(--text);
+    }
+
+    header {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 72px 24px 32px;
+        text-align: center;
+        color: white;
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: clamp(2.2rem, 4vw, 4rem);
+        line-height: 1.1;
+    }
+
+    header p {
+        margin: 14px auto 0;
+        max-width: 680px;
+        font-size: clamp(1rem, 1.5vw, 1.15rem);
+        line-height: 1.7;
+        opacity: 0.95;
+    }
+
+    .badge {
+        display: inline-block;
+        margin-bottom: 18px;
+        padding: 8px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 0.88rem;
+        letter-spacing: 0.02em;
+        backdrop-filter: blur(6px);
+    }
+
+    .container {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 18px 0 42px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+    }
+
+    .card {
+        background: var(--surface);
+        padding: 28px;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 26px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    .card h2 {
+        margin: 0 0 10px;
+        color: var(--text);
+    }
+
+    .card p {
+        margin: 0;
+        font-size: 0.98rem;
+        line-height: 1.6;
+        color: var(--muted);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 18px;
+        padding: 11px 16px;
+        background: var(--primary);
+        color: white;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.25s ease, transform 0.25s ease;
+    }
+
+    .btn:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+    }
+
+    footer {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+        text-align: center;
+        padding: 0 0 36px;
+        color: white;
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    @media (max-width: 640px) {
+        header {
+            padding-top: 56px;
+        }
+
+        .container {
+            width: min(100% - 24px, 1100px);
+        }
+
+        .card {
+            padding: 24px;
+            border-radius: 18px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="badge">Docker • Nginx • Multi-Project Hosting</div>
+    <h1>🚀 DevOps Project Hub</h1>
+    <p>Multi-Student Deployment using Docker & Nginx</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>My Project</h2>
+        <p>Containerized web application deployed using Docker.</p>
+        <a class="btn" href="/ravijaiswal/">View Project</a>
+    </div>
+
+    <div class="card">
+        <h2>Student Project 1</h2>
+        <p>Dynamic deployment supported via Nginx routing.</p>
+        <a class="btn" href="/student1/">Open</a>
+    </div>
+
+    <div class="card">
+        <h2>Student Project 2</h2>
+        <p>Scalable multi-user hosting architecture.</p>
+        <a class="btn" href="/student2/">Open</a>
+    </div>
+
+    <div class="card">
+        <h2>More Projects</h2>
+        <p>Additional deployments coming soon.</p>
+        <a class="btn" href="#">Coming Soon</a>
+    </div>
+
+</div>
+
+<footer>
+    <p>© DevOps Project | Built by Ravi & Rohan</p>
+</footer>
+
+</body>
+</html>
