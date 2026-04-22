@@ -40,13 +40,13 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.SUJAL_HOSTS }} >> ~/.ssh/known_hosts
 
       - name: Test SSH connection
         run: |
           ssh -vvv -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
-            ${{ secrets.USERNAME }}@${{ secrets.HOST }} \
+            ${{ secrets.USERNAME }}@${{ secrets.SUJAL_HOSTS }} \
             "echo SSH_CONNECTION_SUCCESS"
 
       - name: Copy files via SSH
@@ -54,4 +54,4 @@ jobs:
           scp -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
             sites/sujal/index.html \
-            ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/sujal/
+            ${{ secrets.USERNAME }}@${{ secrets.SUJAL_HOSTS }}:/var/www/html/sujal/
