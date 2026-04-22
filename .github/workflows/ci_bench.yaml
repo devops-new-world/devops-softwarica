@@ -30,10 +30,19 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Create bench directory
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BENCH01 }}
+          username: pravesh
+          key: ${{ secrets.PRAVESH }}
+          port: 22
+          script: mkdir -p /var/www/html/bench
+
       - name: copy files via SSH
         uses: appleboy/scp-action@v1
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{ secrets.BENCH01 }}
           username: pravesh
           key: ${{ secrets.PRAVESH }}
           port: 22
