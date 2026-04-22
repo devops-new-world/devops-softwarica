@@ -36,4 +36,4 @@ jobs:
 
       - name: Deploy via SSH with password
         run: |
-          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME1 }}@${{ secrets.HOST1 }} "docker pull ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest && docker stop aruna-site || true && docker rm aruna-site || true && docker run -d --name aruna-site -p 80:80 ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest" 
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME1 }}@${{ secrets.HOST1 }} "docker pull ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest && docker stop aruna-site || true && docker rm aruna-site || true && docker run -d --name aruna-site -p 8080:80 ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest" 
