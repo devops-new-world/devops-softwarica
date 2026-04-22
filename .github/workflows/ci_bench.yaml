@@ -3,7 +3,7 @@ name: Deploy bench01 website
 on:
   push:
     branches:
-      - bench-mates
+      - bench_01
 
 jobs:
   deploy:
