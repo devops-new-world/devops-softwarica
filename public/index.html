@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simon Says — Arcade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- AUTH SCREEN -->
+    <div id="screen-auth" class="screen active">
+      <div class="arcade-cabinet">
+        <div class="cabinet-top">
+          <div class="logo-title">SIMON<span>SAYS</span></div>
+          <div class="logo-sub">★ ARCADE EDITION ★</div>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="tab-btn active" data-tab="login">LOGIN</button>
+          <button class="tab-btn" data-tab="register">REGISTER</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="tab-login" class="tab-content active">
+          <div class="form-group">
+            <label>USERNAME</label>
+            <input type="text" id="login-username" placeholder="ENTER USERNAME" autocomplete="username" />
+          </div>
+          <div class="form-group">
+            <label>PASSWORD</label>
+            <input type="password" id="login-password" placeholder="ENTER PASSWORD" autocomplete="current-password" />
+          </div>
+          <button class="btn-arcade" id="btn-login">▶ INSERT COIN</button>
+          <div class="auth-error" id="login-error"></div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="tab-register" class="tab-content">
+          <div class="form-group">
+            <label>USERNAME</label>
+            <input type="text" id="reg-username" placeholder="CHOOSE USERNAME" autocomplete="username" />
+          </div>
+          <div class="form-group">
+            <label>EMAIL</label>
+            <input type="email" id="reg-email" placeholder="YOUR EMAIL" autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label>PASSWORD</label>
+            <input type="password" id="reg-password" placeholder="6+ CHARACTERS" autocomplete="new-password" />
+          </div>
+          <button class="btn-arcade" id="btn-register">★ JOIN THE GAME</button>
+          <div class="auth-error" id="reg-error"></div>
+        </div>
+
+        <div class="coin-insert">
+          <span class="blink">▼ INSERT COIN TO PLAY ▼</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="screen-game" class="screen">
+      <div class="game-wrapper">
+        <!-- HUD -->
+        <div class="hud">
+          <div class="hud-left">
+            <div class="hud-label">PLAYER</div>
+            <div class="hud-value" id="hud-player">---</div>
+          </div>
+          <div class="hud-center">
+            <div class="hud-label">LEVEL</div>
+            <div class="hud-value" id="hud-level">0</div>
+          </div>
+          <div class="hud-right">
+            <div class="hud-label">HIGH SCORE</div>
+            <div class="hud-value" id="hud-highscore">0</div>
+          </div>
+        </div>
+
+        <!-- Simon Board -->
+        <div class="simon-container">
+          <div class="simon-board" id="simon-board">
+            <button class="simon-btn" id="btn-green" data-color="green"></button>
+            <button class="simon-btn" id="btn-red" data-color="red"></button>
+            <button class="simon-btn" id="btn-yellow" data-color="yellow"></button>
+            <button class="simon-btn" id="btn-blue" data-color="blue"></button>
+            <div class="simon-center">
+              <div class="center-logo">SIMON</div>
+              <div class="center-level" id="center-level">--</div>
+              <button class="center-btn" id="btn-start-game">START</button>
+            </div>
+          </div>
+          <div class="game-status" id="game-status">PRESS START TO PLAY</div>
+        </div>
+
+        <!-- Nav -->
+        <div class="game-nav">
+          <button class="nav-btn" id="btn-go-leaderboard">🏆 SCORES</button>
+          <button class="nav-btn" id="btn-go-profile">👤 PROFILE</button>
+          <button class="nav-btn danger" id="btn-logout">⏻ LOGOUT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD SCREEN -->
+    <div id="screen-leaderboard" class="screen">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🏆 HALL OF FAME</h2>
+          <button class="back-btn" id="lb-back">← BACK</button>
+        </div>
+        <div class="leaderboard-tabs">
+          <button class="tab-btn active" id="lb-tab-global">GLOBAL TOP 10</button>
+          <button class="tab-btn" id="lb-tab-mine">MY SCORES</button>
+        </div>
+        <div id="leaderboard-list" class="score-list"></div>
+      </div>
+    </div>
+
+    <!-- PROFILE SCREEN -->
+    <div id="screen-profile" class="screen">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>👤 PROFILE</h2>
+          <button class="back-btn" id="profile-back">← BACK</button>
+        </div>
+        <div class="profile-stats" id="profile-stats"></div>
+
+        <div class="section-title">UPDATE ACCOUNT</div>
+        <div class="form-group">
+          <label>NEW USERNAME</label>
+          <input type="text" id="upd-username" placeholder="Leave blank to keep" />
+        </div>
+        <div class="form-group">
+          <label>NEW EMAIL</label>
+          <input type="email" id="upd-email" placeholder="Leave blank to keep" />
+        </div>
+        <div class="form-group">
+          <label>NEW PASSWORD</label>
+          <input type="password" id="upd-newpw" placeholder="Leave blank to keep" />
+        </div>
+        <div class="form-group">
+          <label>CURRENT PASSWORD <span style="color:#ff4466">*required</span></label>
+          <input type="password" id="upd-curpw" placeholder="Required to save changes" />
+        </div>
+        <button class="btn-arcade" id="btn-update-profile">💾 SAVE CHANGES</button>
+        <div class="auth-error" id="profile-error"></div>
+        <div class="auth-success" id="profile-success"></div>
+
+        <div class="section-title danger-zone">⚠ DANGER ZONE</div>
+        <div class="form-group">
+          <label>PASSWORD TO DELETE ACCOUNT</label>
+          <input type="password" id="del-password" placeholder="Confirm your password" />
+        </div>
+        <button class="btn-arcade danger" id="btn-delete-account">🗑 DELETE ACCOUNT</button>
+      </div>
+    </div>
+
+    <!-- GAME OVER OVERLAY -->
+    <div id="overlay-gameover" class="overlay hidden">
+      <div class="overlay-box">
+        <div class="overlay-title">GAME OVER</div>
+        <div class="overlay-score">
+          LEVEL REACHED: <span id="go-level">0</span><br/>
+          SCORE: <span id="go-score">0</span>
+        </div>
+        <div id="go-rank" class="overlay-rank"></div>
+        <button class="btn-arcade" id="btn-play-again">▶ PLAY AGAIN</button>
+        <button class="btn-arcade secondary" id="btn-go-scores">VIEW SCORES</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/game.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
