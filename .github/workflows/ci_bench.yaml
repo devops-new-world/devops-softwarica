@@ -1,67 +1,37 @@
-name: Deploy Bench website
+name: Deploy bench01 website
 
 on:
   push:
     branches:
-      - "bench_01"
+      - bench-mates
 
 jobs:
-  docker-build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push Docker image
-        run: |
-          docker build -f sites/bench/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/bench:latest sites/bench
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bench:latest
-
   deploy:
     runs-on: ubuntu-latest
-    needs: docker-build-and-push
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: copy files to temp via SSH
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        
+      - name: Copy files via SCP
         uses: appleboy/scp-action@v1
         with:
-          host: ${{ secrets.BENCH01 }}
-          username: pravesh
+          host: eef1df54591c.mylabserver.com
+          username: ${{ secrets.BENCH01 }}
           key: ${{ secrets.PRAVESH }}
-          port: 22
-          source: "sites/bench/index.html"
-          strip_components: 2
-          target: "/tmp/bench/"
-          overwrite: true
+          source: "./*"
+          target: /opt/bench-01
+      - name: Run Docker Compose on remote server
+        run: |
+          # Create SSH directory
+          mkdir -p ~/.ssh
 
-      - name: Move landing page to web root
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.BENCH01 }}
-          username: pravesh
-          key: ${{ secrets.PRAVESH }}
-          port: 22
-          script: |
-            set -e
-            if mkdir -p /var/www/html/bench 2>/dev/null && cp /tmp/bench/index.html /var/www/html/bench/index.html 2>/dev/null; then
-              echo "Deployed with direct write permissions"
-              exit 0
-            fi
+          # Write SSH key to file
+          echo "${{ secrets.PRAVESH }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
 
-            if command -v sudo >/dev/null 2>&1; then
-              sudo mkdir -p /var/www/html/bench
-              sudo cp /tmp/bench/index.html /var/www/html/bench/index.html
-              echo "Deployed using sudo"
-              exit 0
-            fi
+          # Add remote host to known_hosts to avoid prompt
+          ssh-keyscan -H eef1df54591c.mylabserver.com >> ~/.ssh/known_hosts
 
-            echo "Failed to deploy: user pravesh cannot write to /var/www/html/bench and sudo is unavailable."
-            exit 1
+          # Run Docker Compose remotely
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.BENCH01 }}@eef1df54591c.mylabserver.com \
+            "cd /opt/bench-01 && docker compose up -d"
