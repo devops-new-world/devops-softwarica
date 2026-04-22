@@ -23,19 +23,13 @@ jobs:
         run: |
           docker build -t rohan -f sites/rohan/Dockerfile sites/rohan
 
-      - name: Upload built site
-        uses: actions/upload-artifact@v4
-        with:
-          name: rohan-site
-          path: sites/rohan/index.html
-
   deploy:
     name: Deploy rohan website
     runs-on: ubuntu-latest
     needs: docker-build
     env:
       SSH_HOST: ${{ secrets.HOST }}
-      SSH_USER: ${{ secrets.USERNAME }}
+      SSH_USER: ${{ secrets.USERNAME || secrets.USER }}
       SSH_KEY: ${{ secrets.KEY }}
       SSH_PASSWORD: ${{ secrets.PASSWORD }}
       DEPLOY_PATH: /var/www/html/rohan
@@ -43,11 +37,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Download built site
-        uses: actions/download-artifact@v4
-        with:
-          name: rohan-site
-          path: deploy
+      - name: Validate required secrets
+        run: |
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ]; then
+            echo "Missing required secrets: HOST and USERNAME (or USER)"
+            exit 1
+          fi
+
+          if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
+            echo "Provide at least one authentication secret: KEY (preferred) or PASSWORD"
+            exit 1
+          fi
 
       - name: Set up SSH
         run: |
@@ -95,18 +95,17 @@ jobs:
         run: |
           SCP_OPTS="-o StrictHostKeyChecking=accept-new -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostkeyAlgorithms=+ssh-rsa"
 
-          sudo apt-get update -y
-          sudo apt-get install -y sshpass
-
           if [ "$USE_KEY_AUTH" = "true" ]; then
             ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes $SCP_OPTS "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
-            scp -i ~/.ssh/id_rsa -o IdentitiesOnly=yes -o PreferredAuthentications=publickey $SCP_OPTS deploy/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/index.html" && exit 0
+            scp -i ~/.ssh/id_rsa -o IdentitiesOnly=yes -o PreferredAuthentications=publickey $SCP_OPTS sites/rohan/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/index.html" && exit 0
             echo "Key-based auth failed, attempting password fallback if PASSWORD secret is set..."
           fi
 
           if [ -n "$SSH_PASSWORD" ]; then
+            sudo apt-get update -y
+            sudo apt-get install -y sshpass
             sshpass -p "$SSH_PASSWORD" ssh $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
-            sshpass -p "$SSH_PASSWORD" scp $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no deploy/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/index.html" && exit 0
+            sshpass -p "$SSH_PASSWORD" scp $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no sites/rohan/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/index.html" && exit 0
           fi
 
           echo "Deployment failed: authentication unsuccessful. Verify KEY matches USERNAME@HOST, or set PASSWORD secret."
