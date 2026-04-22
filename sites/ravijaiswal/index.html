@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DevOps Project Hub</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #1f4037, #99f2c8);
+        color: #333;
+    }
+
+    header {
+        padding: 40px;
+        text-align: center;
+        color: white;
+    }
+
+    header h1 {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    header p {
+        font-size: 18px;
+    }
+
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .card {
+        background: white;
+        width: 280px;
+        margin: 20px;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        transition: transform 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-10px);
+    }
+
+    .card h2 {
+        margin-bottom: 10px;
+    }
+
+    .card p {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .btn {
+        display: inline-block;
+        margin-top: 15px;
+        padding: 10px 15px;
+        background: #1f4037;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .btn:hover {
+        background: #145c4a;
+    }
+
+    footer {
+        text-align: center;
+        padding: 20px;
+        color: white;
+        margin-top: 30px;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🚀 DevOps Project Hub</h1>
+    <p>Multi-Student Deployment using Docker & Nginx</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>My Project</h2>
+        <p>Containerized web application deployed using Docker.</p>
+        <a class="btn" href="/ravijaiswal/">View Project</a>
+    </div>
+
+    <div class="card">
+        <h2>Student Project 1</h2>
+        <p>Dynamic deployment supported via Nginx routing.</p>
+        <a class="btn" href="/student1/">Open</a>
+    </div>
+
+    <div class="card">
+        <h2>Student Project 2</h2>
+        <p>Scalable multi-user hosting architecture.</p>
+        <a class="btn" href="/student2/">Open</a>
+    </div>
+
+    <div class="card">
+        <h2>More Projects</h2>
+        <p>Additional deployments coming soon.</p>
+        <a class="btn" href="#">Coming Soon</a>
+    </div>
+
+</div>
+
+<footer>
+    <p>© DevOps Project | Built by Ravi</p>
+</footer>
+
+</body>
+</html>
