@@ -6,7 +6,34 @@ on:
       - feature/ritika
 
 jobs:
+
+  # -------- SAST STAGE --------
+  sast:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # SEMGREP
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep Scan
+        run: semgrep --config=auto --error
+
+      # TRIVY
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Run Trivy FS Scan
+        run: trivy fs --exit-code 1 --severity HIGH,CRITICAL .
+
+  # -------- BUILD STAGE --------
   docker-build-and-push:
+    needs: sast   # 👈 IMPORTANT (runs only if SAST passes)
     runs-on: ubuntu-latest
 
     steps:
@@ -24,6 +51,7 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devops-class:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops-class:latest
 
+  # -------- DEPLOY STAGE --------
   deploy:
     needs: docker-build-and-push
     runs-on: ubuntu-latest
