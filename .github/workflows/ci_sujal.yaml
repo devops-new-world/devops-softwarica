@@ -57,5 +57,8 @@ jobs:
             ${{ secrets.USERNAME }}@${{ secrets.SUJAL_HOSTS }}:/var/www/html/sujal/
       - name: Debug secrets
         run: |
-          echo "HOST value is: '${{ secrets.SUJAL_HOSTS }}'"
-          echo "USERNAME value is: '${{ secrets.USERNAME }}'"
+          echo "HOST length: ${#HOST_VAL}"
+          echo "USERNAME length: ${#USER_VAL}"
+        env:
+          HOST_VAL: ${{ secrets.SUJAL_HOSTS }}
+          USER_VAL: ${{ secrets.USERNAME }}
