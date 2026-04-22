@@ -30,16 +30,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Create bench directory
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.BENCH01 }}
-          username: pravesh
-          key: ${{ secrets.PRAVESH }}
-          port: 22
-          script: mkdir -p /var/www/html/bench
-
-      - name: copy files via SSH
+      - name: copy files to temp via SSH
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.BENCH01 }}
@@ -48,5 +39,29 @@ jobs:
           port: 22
           source: "sites/bench/index.html"
           strip_components: 2
-          target: "/var/www/html/bench/"
+          target: "/tmp/bench/"
           overwrite: true
+
+      - name: Move landing page to web root
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.BENCH01 }}
+          username: pravesh
+          key: ${{ secrets.PRAVESH }}
+          port: 22
+          script: |
+            set -e
+            if mkdir -p /var/www/html/bench 2>/dev/null && cp /tmp/bench/index.html /var/www/html/bench/index.html 2>/dev/null; then
+              echo "Deployed with direct write permissions"
+              exit 0
+            fi
+
+            if command -v sudo >/dev/null 2>&1; then
+              sudo mkdir -p /var/www/html/bench
+              sudo cp /tmp/bench/index.html /var/www/html/bench/index.html
+              echo "Deployed using sudo"
+              exit 0
+            fi
+
+            echo "Failed to deploy: user pravesh cannot write to /var/www/html/bench and sudo is unavailable."
+            exit 1
