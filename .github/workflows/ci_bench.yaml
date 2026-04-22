@@ -4,9 +4,49 @@ on:
   push:
     branches:
       - bench_01
+  workflow_dispatch:
+
+env:
+  BENCH_HOST: ${{ secrets.BENCH_HOST }}
+  BENCH_PORT: "22"
+  BENCH_USER: ${{ secrets.BENCH01 }}
+  BENCH_KEY: ${{ secrets.PRAVESH }}
 
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      can_deploy: ${{ steps.check.outputs.can_deploy }}
+    steps:
+      - name: Check DNS and SSH reachability
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${BENCH_HOST}" || -z "${BENCH_USER}" || -z "${BENCH_KEY}" ]]; then
+            echo "Missing one or more required secrets: BENCH_HOST, BENCH01, PRAVESH"
+            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! getent hosts "${BENCH_HOST}" > /dev/null; then
+            echo "Host is not resolvable from runner: ${BENCH_HOST}"
+            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! timeout 5 bash -c "cat < /dev/null > /dev/tcp/${BENCH_HOST}/${BENCH_PORT}" 2>/dev/null; then
+            echo "Host resolves, but SSH port is unreachable: ${BENCH_HOST}:${BENCH_PORT}"
+            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "can_deploy=true" >> "$GITHUB_OUTPUT"
+
   deploy:
+    needs: preflight
+    if: needs.preflight.outputs.can_deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
