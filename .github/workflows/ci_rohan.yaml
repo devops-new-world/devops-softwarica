@@ -41,15 +41,20 @@ jobs:
         run: |
           if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ]; then
             echo "Missing required secrets: HOST and USERNAME (or USER)"
-            exit 1
+            echo "DEPLOY_ENABLED=false" >> "$GITHUB_ENV"
+            exit 0
           fi
 
           if [ -z "$SSH_KEY" ] && [ -z "$SSH_PASSWORD" ]; then
-            echo "Provide at least one authentication secret: KEY (preferred) or PASSWORD"
-            exit 1
+            echo "No KEY/PASSWORD provided. Deployment will be skipped safely."
+            echo "DEPLOY_ENABLED=false" >> "$GITHUB_ENV"
+            exit 0
           fi
 
+          echo "DEPLOY_ENABLED=true" >> "$GITHUB_ENV"
+
       - name: Set up SSH
+        if: env.DEPLOY_ENABLED == 'true'
         run: |
           install -m 700 -d ~/.ssh
           USE_KEY_AUTH=false
@@ -84,14 +89,16 @@ jobs:
           fi
 
           if [ "$USE_KEY_AUTH" = false ] && [ -z "$SSH_PASSWORD" ]; then
-            echo "No valid KEY and PASSWORD is not set."
-            exit 1
+            echo "No valid KEY and PASSWORD is not set. Deployment will be skipped safely."
+            echo "DEPLOY_ENABLED=false" >> "$GITHUB_ENV"
+            exit 0
           fi
 
           echo "USE_KEY_AUTH=$USE_KEY_AUTH" >> "$GITHUB_ENV"
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Copy files via SSH
+        if: env.DEPLOY_ENABLED == 'true'
         run: |
           SCP_OPTS="-o StrictHostKeyChecking=accept-new -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostkeyAlgorithms=+ssh-rsa"
 
@@ -110,3 +117,7 @@ jobs:
 
           echo "Deployment failed: authentication unsuccessful. Verify KEY matches USERNAME@HOST, or set PASSWORD secret."
           exit 1
+
+      - name: Skip deploy (no valid auth)
+        if: env.DEPLOY_ENABLED != 'true'
+        run: echo "Skipping rohan deploy safely because required/auth secrets are missing or invalid."
