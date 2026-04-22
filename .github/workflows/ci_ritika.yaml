@@ -33,7 +33,7 @@ jobs:
 
   # -------- BUILD STAGE --------
   docker-build-and-push:
-    needs: sast   # 👈 IMPORTANT (runs only if SAST passes)
+    needs: sast   #  IMPORTANT (runs only if SAST passes)
     runs-on: ubuntu-latest
 
     steps:
