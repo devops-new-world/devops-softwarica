@@ -55,3 +55,7 @@ jobs:
             -o StrictHostKeyChecking=no \
             sites/sujal/index.html \
             ${{ secrets.USERNAME }}@${{ secrets.SUJAL_HOSTS }}:/var/www/html/sujal/
+      - name: Debug secrets
+        run: |
+          echo "HOST value is: '${{ secrets.SUJAL_HOSTS }}'"
+          echo "USERNAME value is: '${{ secrets.USERNAME }}'"
