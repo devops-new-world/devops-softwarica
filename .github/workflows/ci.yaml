@@ -75,14 +75,16 @@ jobs:
           SCP_OPTS="-o StrictHostKeyChecking=accept-new -o PubkeyAcceptedAlgorithms=+ssh-rsa -o HostkeyAlgorithms=+ssh-rsa"
 
           if [ "$USE_KEY_AUTH" = "true" ]; then
-            scp -i ~/.ssh/id_rsa -o IdentitiesOnly=yes -o PreferredAuthentications=publickey $SCP_OPTS sites/trainer/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH" && exit 0
+            ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes $SCP_OPTS "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
+            scp -i ~/.ssh/id_rsa -o IdentitiesOnly=yes -o PreferredAuthentications=publickey $SCP_OPTS sites/trainer/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/index.html" && exit 0
             echo "Key-based auth failed, attempting password fallback if PASSWORD secret is set..."
           fi
 
           if [ -n "$SSH_PASSWORD" ]; then
             sudo apt-get update -y
             sudo apt-get install -y sshpass
-            sshpass -p "$SSH_PASSWORD" scp $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no sites/trainer/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH" && exit 0
+            sshpass -p "$SSH_PASSWORD" ssh $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
+            sshpass -p "$SSH_PASSWORD" scp $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no sites/trainer/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/index.html" && exit 0
           fi
 
           echo "Deployment failed: authentication unsuccessful. Verify KEY matches USERNAME@HOST, or set PASSWORD secret."
