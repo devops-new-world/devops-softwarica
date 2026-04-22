@@ -28,10 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker-build
     env:
-      SSH_HOST: ${{ secrets.HOST }}
-      SSH_USER: ${{ secrets.USERNAME || secrets.USER }}
-      SSH_KEY: ${{ secrets.KEY }}
-      SSH_PASSWORD: ${{ secrets.PASSWORD }}
+      SSH_HOST: ${{ secrets.ROHAN_HOST || secrets.HOST }}
+      SSH_USER: ${{ secrets.ROHAN_USERNAME || secrets.USERNAME || secrets.USER }}
+      SSH_KEY: ${{ secrets.ROHAN_KEY || secrets.KEY }}
+      SSH_PASSWORD: ${{ secrets.ROHAN_PASSWORD || secrets.PASSWORD }}
       DEPLOY_PATH: /var/www/html/rohan
     steps:
       - name: Checkout code
@@ -40,7 +40,7 @@ jobs:
       - name: Validate required secrets
         run: |
           if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ]; then
-            echo "Missing required secrets: HOST and USERNAME (or USER)"
+            echo "Missing required secrets: ROHAN_HOST and ROHAN_USERNAME (or fallback HOST and USERNAME/USER)"
             echo "DEPLOY_ENABLED=false" >> "$GITHUB_ENV"
             exit 0
           fi
@@ -84,7 +84,7 @@ jobs:
             if ssh-keygen -y -f ~/.ssh/id_rsa >/dev/null 2>&1; then
               USE_KEY_AUTH=true
             else
-              echo "Invalid SSH key in secret KEY; continuing with PASSWORD fallback if available."
+              echo "Invalid SSH key in secret ROHAN_KEY/KEY; continuing with PASSWORD fallback if available."
             fi
           fi
 
@@ -115,7 +115,7 @@ jobs:
             sshpass -p "$SSH_PASSWORD" scp $SCP_OPTS -o PreferredAuthentications=password -o PubkeyAuthentication=no sites/rohan/index.html "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/index.html" && exit 0
           fi
 
-          echo "Deployment failed: authentication unsuccessful. Verify KEY matches USERNAME@HOST, or set PASSWORD secret."
+          echo "Deployment failed: authentication unsuccessful. Verify ROHAN_KEY (or KEY) matches ROHAN_USERNAME@ROHAN_HOST (or USERNAME@HOST), or set ROHAN_PASSWORD/PASSWORD."
           exit 1
 
       - name: Skip deploy (no valid auth)
