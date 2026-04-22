@@ -11,23 +11,6 @@ env:
   BENCH_PORT: "22"
   BENCH_USER: ${{ secrets.BENCH01 }}
   BENCH_KEY: ${{ secrets.PRAVESH }}
-  
-jobs:
-  docker-build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and Push Docker Image
-        run: |
-          docker build -f sites/pravesh/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/pravesh:latest sites/pravesh
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pravesh:latest
 
 jobs:
   preflight:
@@ -60,6 +43,22 @@ jobs:
           fi
 
           echo "can_deploy=true" >> "$GITHUB_OUTPUT"
+jobs:
+  docker-build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -f sites/pravesh/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/pravesh:latest sites/pravesh
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pravesh:latest
 
   deploy:
     needs: preflight
