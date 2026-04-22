@@ -38,27 +38,16 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SUJAL_SSH }}
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SUJAL_HOSTS }} >> ~/.ssh/known_hosts
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
 
       - name: Test SSH connection
         run: |
-          ssh -vvv -i ~/.ssh/id_rsa \
-            -o StrictHostKeyChecking=no \
-            ${{ secrets.USERNAME }}@${{ secrets.SUJAL_HOSTS }} \
-            "echo SSH_CONNECTION_SUCCESS"
+          ssh -i ~/.ssh/id_rsa sujal@3.108.54.194 "echo SSH_CONNECTION_SUCCESS"
 
       - name: Copy files via SSH
         run: |
           scp -i ~/.ssh/id_rsa \
-            -o StrictHostKeyChecking=no \
             sites/sujal/index.html \
-            ${{ secrets.USERNAME }}@${{ secrets.SUJAL_HOSTS }}:/var/www/html/sujal/
-      - name: Debug secrets
-        run: |
-          echo "HOST length: ${#HOST_VAL}"
-          echo "USERNAME length: ${#USER_VAL}"
-        env:
-          HOST_VAL: ${{ secrets.SUJAL_HOSTS }}
-          USER_VAL: ${{ secrets.USERNAME }}
+            sujal@3.108.54.194:/var/www/html/sujal/
