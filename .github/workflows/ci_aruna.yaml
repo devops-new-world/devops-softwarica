@@ -1,4 +1,4 @@
-name: Deploy Aruna's website
+name: Deploy Aruna's website 
 
 on:
   push:
