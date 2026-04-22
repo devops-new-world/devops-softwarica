@@ -23,4 +23,13 @@ jobs:
 
       - name: Run Docker Compose on remote server
         run: |
-          ssh -i ${{ secrets.PRATYUSH_SSH_KEY }} ${{ secrets.PRATYUSH_SERVER_USERNAME }}@eef1df54591c.mylabserver.com "cd /home/pratyush/simon-game && docker compose up -d"
+          # Write SSH key to file
+          echo "${{ secrets.PRATYUSH_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          # Add remote host to known_hosts to avoid prompt
+          ssh-keyscan -H eef1df54591c.mylabserver.com >> ~/.ssh/known_hosts
+
+          # Run Docker Compose remotely
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.PRATYUSH_SERVER_USERNAME }}@eef1df54591c.mylabserver.com \
+            "cd /home/pratyush/simon-game && docker compose up -d"
