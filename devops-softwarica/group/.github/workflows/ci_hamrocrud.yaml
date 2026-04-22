@@ -3,11 +3,11 @@ name: Deploy Rijen Full-Stack App
 on:
   push:
     branches:
-      - "feature/rijen"
+      - "bench-hamro"
     paths:
-      - "sites/rijen/HamroCRUD/backend/**"
-      - "sites/rijen/HamroCRUD/frontend/**"
-      - "sites/rijen/HamroCRUD/docker-compose.yaml"
+      - "devops-softwarica/group/HamroCRUD/backend/**"
+      - "devops-softwarica/group/HamroCRUD/frontend/**"
+      - "devops-softwarica/group/HamroCRUD/docker-compose.yaml"
 
 jobs:
   build-backend:
@@ -25,7 +25,7 @@ jobs:
       - name: Build & Push Backend
         uses: docker/build-push-action@v5
         with:
-          context: ./sites/rijen/HamroCRUD/backend
+          context: ./devops-softwarica/group/HamroCRUD/backend
           push: true
           tags: rezenn/rijen-backend:latest
 
@@ -44,7 +44,7 @@ jobs:
       - name: Build & Push Frontend
         uses: docker/build-push-action@v5
         with:
-          context: ./sites/rijen/HamroCRUD/frontend
+          context: ./devops-softwarica/group/HamroCRUD/frontend
           push: true
           tags: rezenn/rijen-frontend:latest
 
@@ -71,7 +71,7 @@ jobs:
       - name: Copy docker-compose to server
         run: |
           scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-          sites/rijen/docker-compose.yaml \
+          devops-softwarica/group/HamroCRUD/docker-compose.yaml \
           rijen@${{ secrets.HOST }}:~/rijen/docker-compose.yaml
 
       - name: Pull images & restart containers
