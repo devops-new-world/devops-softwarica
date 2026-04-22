@@ -23,6 +23,9 @@ jobs:
 
       - name: Run Docker Compose on remote server
         run: |
+          # Create SSH directory
+          mkdir -p ~/.ssh
+
           # Write SSH key to file
           echo "${{ secrets.PRATYUSH_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
