@@ -1,0 +1,29 @@
+k8s_version: "1.33"
+
+# Automatically generate repo URL
+k8s_repo_url: "https://pkgs.k8s.io/core:/stable:/v{{ k8s_version }}/deb/"
+
+container_runtime: containerd
+containerd_version: "latest"
+
+pod_network_cidr: "192.168.0.0/16"
+cni_provider: calico
+calico_manifest_url: "https://docs.projectcalico.org/manifests/calico.yaml"
+
+disable_swap: true
+enable_ip_forward: true
+
+k8s_components:
+  - kubelet
+  - kubeadm
+  - kubectl
+
+k8s_user: "ubuntu"
+k8s_user_home: "/home/ubuntu"
+
+master_init_extra_args: ""
+worker_join_timeout: 300
+
+worker_node_labels:
+  - "node-role.kubernetes.io/worker=worker"
+

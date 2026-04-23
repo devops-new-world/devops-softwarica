@@ -1,0 +1,109 @@
+# tasks only, no play, no hosts
+
+- name: Ensure keyrings directory exists
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Remove all old Kubernetes repo list files
+  ansible.builtin.shell: |
+    rm -f /etc/apt/sources.list.d/*kube*
+    rm -f /etc/apt/sources.list.d/*k8s*
+    rm -f /etc/apt/sources.list.d/*kubernetes*
+    rm -f /etc/apt/sources.list.d/*isv*
+    rm -f /etc/apt/sources.list.d/*pkgs.k8s*
+
+- name: Download Kubernetes APT key
+  get_url:
+    url: "{{ k8s_repo_url }}Release.key"
+    dest: "/tmp/kubernetes-release.key"
+    mode: '0644'
+
+- name: Convert Release.key to GPG keyring format
+  command: >
+    gpg --batch --yes --dearmor
+    -o {{ k8s_keyring_path }} /tmp/kubernetes-release.key
+  args:
+    creates: "{{ k8s_keyring_path }}"
+
+- name: Add Kubernetes repository
+  copy:
+    dest: "{{ k8s_apt_list_path }}"
+    content: |
+      deb [signed-by={{ k8s_keyring_path }}] {{ k8s_repo_url }} /
+
+# ----------- FIX: APT CLEANUP ---------------
+
+- name: Remove apt list cache
+  file:
+    path: /var/lib/apt/lists
+    state: absent
+
+- name: Recreate apt list directory
+  file:
+    path: /var/lib/apt/lists
+    state: directory
+    mode: '0755'
+
+- name: Clean APT cache
+  command: apt-get clean
+
+- name: Update APT cache (fresh)
+  apt:
+    update_cache: yes
+
+# ----------- INSTALL RUNTIME + K8S -----------
+
+- name: Install containerd
+  apt:
+    name: containerd
+    state: present
+
+- name: Enable and start containerd
+  service:
+    name: containerd
+    enabled: yes
+    state: started
+
+- name: Install Kubernetes components
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
+- name: Get kubelet version
+  command: kubelet --version
+  register: kubelet_version
+  changed_when: false
+  failed_when: false
+
+- name: Get kubeadm version
+  command: kubeadm version -o short
+  register: kubeadm_version
+  changed_when: false
+  failed_when: false
+
+- name: Get kubectl version
+  command: kubectl version --client --short
+  register: kubectl_version
+  changed_when: false
+  failed_when: false
+
+- name: Show installed Kubernetes component versions
+  debug:
+    msg:
+      - "kubelet version: {{ kubelet_version.stdout | default('Unable to get version') }}"
+      - "kubeadm version: {{ kubeadm_version.stdout | default('Unable to get version') }}"
+      - "kubectl version: {{ kubectl_version.stdout | default('Unable to get version') }}"
+
+- name: Hold Kubernetes packages
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
