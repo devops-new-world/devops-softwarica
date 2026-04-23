@@ -32,7 +32,7 @@
 
     - name: Deploy default landing page
       copy:
-        src: public/
+        src: "../../../../sites/natak/app.html"
         dest: /var/www/html/
         owner: www-data
         group: www-data
