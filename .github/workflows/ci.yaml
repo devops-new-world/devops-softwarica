@@ -1,8 +1,7 @@
 name: Deployingggggg
 on:
-  push:
-    branches:
-      - bench-villians
+  workflow_dispatch:
+  
 jobs:
   docker-build-and-push:
     runs-on: ubuntu-latest
