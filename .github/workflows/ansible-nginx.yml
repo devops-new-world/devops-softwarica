@@ -61,7 +61,7 @@ jobs:
 
       - name: Run Ansible Playbook (Password Auth)
         if: ${{ inputs.auth_method == 'password' }}
-        working-directory: ./infra/ansible/nginx
+        working-directory: ./infra/ansible/nginx/nginx
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
