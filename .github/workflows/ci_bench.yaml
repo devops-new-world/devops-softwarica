@@ -1,109 +1,31 @@
-name: Bench Docker Build & Deploy
+name: Deploy My website
 
 on:
   push:
     branches:
-      - bench_01
-  workflow_dispatch:
-
-env:
-  BENCH_HOST: ${{ secrets.BENCH_HOST }}
-  BENCH_PORT: "22"
-  BENCH_USER: ${{ secrets.BENCH01 }}
-  BENCH_KEY: ${{ secrets.PRAVESH }}
-  BENCH_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/bench01:latest
-
+    - "bench_01"
 jobs:
-  preflight:
-    runs-on: ubuntu-latest
-    outputs:
-      can_deploy: ${{ steps.check.outputs.can_deploy }}
-    steps:
-      - name: Check DNS and SSH reachability
-        id: check
-        shell: bash
-        run: |
-          set -euo pipefail
+    docker-build:
+      runs-on: ubuntu-latest
+      steps:
+        - name: checkout code
+          uses: actions/checkout@v4
+        - name: docker build
+          run: |
+            docker build -t pravesh .
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v4
+            
+            - name: Set up SSH
+              run: |
+                mkdir -p ~/.ssh
+                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
+                chmod 600 ~/.ssh/id_rsa
+                ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
-          if [[ -z "${BENCH_HOST}" || -z "${BENCH_USER}" || -z "${BENCH_KEY}" ]]; then
-            echo "Missing one or more required secrets: BENCH_HOST, BENCH01, PRAVESH"
-            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if ! getent hosts "${BENCH_HOST}" > /dev/null; then
-            echo "Host is not resolvable from runner: ${BENCH_HOST}"
-            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if ! timeout 5 bash -c "cat < /dev/null > /dev/tcp/${BENCH_HOST}/${BENCH_PORT}" 2>/dev/null; then
-            echo "Host resolves, but SSH port is unreachable: ${BENCH_HOST}:${BENCH_PORT}"
-            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "can_deploy=true" >> "$GITHUB_OUTPUT"
-
-  docker-build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and Push Bench Image
-        run: |
-          docker build -f sites/bench/Dockerfile -t "${BENCH_IMAGE}" sites/bench
-          docker push "${BENCH_IMAGE}"
-
-  deploy:
-    needs:
-      - preflight
-      - docker-build-and-push
-    if: needs.preflight.outputs.can_deploy == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        
-      - name: Copy files via SCP
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ env.BENCH_HOST }}
-          username: ${{ env.BENCH_USER }}
-          key: ${{ env.BENCH_KEY }}
-          port: ${{ env.BENCH_PORT }}
-          source: "./*"
-          target: /opt/bench-01
-
-      - name: Run Docker Compose on remote server
-        run: |
-          # Create SSH directory
-          mkdir -p ~/.ssh
-
-          # Write SSH key to file
-          echo "${{ env.BENCH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-
-          # Add remote host to known_hosts to avoid prompt
-          ssh-keyscan -p "${{ env.BENCH_PORT }}" -H "${{ env.BENCH_HOST }}" >> ~/.ssh/known_hosts
-
-          # Run Docker Compose remotely
-          ssh -i ~/.ssh/id_ed25519 -p "${{ env.BENCH_PORT }}" "${{ env.BENCH_USER }}@${{ env.BENCH_HOST }}" \
-            "cd /opt/bench-01 && (docker compose pull || true) && docker compose up -d --build --force-recreate"
-
-  deploy-skipped:
-    needs:
-      - preflight
-      - docker-build-and-push
-    if: needs.preflight.outputs.can_deploy != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Report skip reason
-        run: echo "Deploy skipped because host is offline/unresolvable or required server secrets are missing. Docker image push still ran."
+            - name: Copy files via SSH
+              run: |
+                scp -i ~/.ssh/id_rsa sites/pravesh/index.html ${{ secrets.PRAVESH }}@${{ secrets.HOST }}:/var/www/html/bench01
