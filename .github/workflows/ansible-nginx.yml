@@ -1,4 +1,4 @@
-name: Provision Nginx Server
+name: Provision Nginx Server Hamro
 
 on:
   workflow_dispatch:
@@ -46,10 +46,9 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ inputs.server_ip }} >> ~/.ssh/known_hosts
-
       - name: Run Ansible Playbook (Password Auth)
         if: ${{ inputs.auth_method == 'password' }}
-        working-directory: ./k8s/infra/ansible/nginx/nginx
+        working-directory: ./infra/ansible/nginx/nginx
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
