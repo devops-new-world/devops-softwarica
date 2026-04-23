@@ -55,12 +55,12 @@ jobs:
           echo "${{ inputs.server_ip }} ansible_user=${{ inputs.ssh_user }} ansible_ssh_pass='${{ inputs.ssh_password }}'" > inventory.ini
           ansible all -i inventory.ini -m ping
           ansible-playbook -i inventory.ini playbook.yml
-      - name: Run Ansible Playbook (Key Auth)
-        if: ${{ inputs.auth_method == 'key' }}
-        working-directory: ./infra/ansible/nginx/nginx
+      - name: Run Ansible Playbook (Password Auth)
+        if: ${{ inputs.auth_method == 'password' }}
+        working-directory: ./infra/ansible/nginx
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
-          echo "${{ inputs.server_ip }} ansible_user=${{ inputs.ssh_user }}" > inventory.ini
+          echo "${{ inputs.server_ip }} ansible_user=${{ inputs.ssh_user }} ansible_ssh_pass='${{ inputs.ssh_password }}'" > inventory.ini
           ansible all -i inventory.ini -m ping
           ansible-playbook -i inventory.ini playbook.yml
