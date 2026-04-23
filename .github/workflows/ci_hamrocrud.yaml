@@ -1,0 +1,56 @@
+name: Deploy HamroCRUD website
+
+on:
+  push:
+    branches:
+      - "bench-hamro"
+
+jobs:
+  docker-build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: rezenn
+          password: ${{ secrets.RIJEN_DOCKER_TOKEN }}
+
+      - name: Build Docker Image
+        run: docker build -t rezenn/rijen:latest .
+
+      - name: Push Docker Image
+        run: docker push rezenn/rijen:latest
+
+  deploy:
+    needs: docker-build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf "%s" "${{ secrets.RIJEN_SECRET }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -4 -T 10 eef1df54591c.mylabserver.com >> ~/.ssh/known_hosts || true
+
+      - name: Test SSH Connection
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
+          rijen@eef1df54591c.mylabserver.com "echo SSH OK"
+
+      - name: Deploy Docker Container on Server
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
+          rijen@eef1df54591c.mylabserver.com "
+            docker pull rezenn/rijen:latest &&
+            docker stop hamrocrud 2>/dev/null || true &&
+            docker rm hamrocrud 2>/dev/null || true &&
+            docker run -d --name hamrocrud -p 9092:80 rezenn/rijen:latest
+          "
