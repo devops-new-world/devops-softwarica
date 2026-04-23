@@ -61,4 +61,4 @@ jobs:
             docker pull ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/bench-natak:latest
             docker stop natak-site || true
             docker rm natak-site || true
-            docker run -d --name natak-site -p 9092:80 ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/bench-natak:latest
+            docker run -d --name natak-site -p 9093:80 ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/bench-natak:latest
