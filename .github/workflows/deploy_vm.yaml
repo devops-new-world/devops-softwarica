@@ -1,4 +1,4 @@
-name: Deploy bench_01
+name: Deploy bench-ro
 
 on:
   workflow_dispatch:

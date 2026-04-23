@@ -52,5 +52,5 @@ jobs:
             docker pull rezenn/rijen:latest &&
             docker stop hamrocrud 2>/dev/null || true &&
             docker rm hamrocrud 2>/dev/null || true &&
-            docker run -d --name hamrocrud -p 9091:80 rezenn/rijen:latest
+            docker run -d --name hamrocrud -p 9092:80 rezenn/rijen:latest
           "
