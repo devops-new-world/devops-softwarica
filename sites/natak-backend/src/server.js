@@ -4,9 +4,8 @@ require("dotenv").config();
 
 const itemRoutes = require("./routes/itemRoutes");
 
-// nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
 // This API is stateless and only serves JSON; it does not use cookie-based/session auth.
-const app = express();
+const app = express(); // nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
 const PORT = process.env.PORT || 5000;
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
