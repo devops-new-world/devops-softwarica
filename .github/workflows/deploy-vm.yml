@@ -68,7 +68,7 @@ jobs:
           terraform_version: latest
 
       - name: Terraform Init
-        working-directory: ./k8s/infra/terraform
+        working-directory: /infra/terraform
         run: terraform init
 
       - name: Setup SSH public key
