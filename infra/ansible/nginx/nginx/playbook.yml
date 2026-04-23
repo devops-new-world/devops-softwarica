@@ -8,7 +8,7 @@
     # Example backend configuration:
     #  - path: "/app1"
     #    proxy_pass: "http://127.0.0.1:8081"
-    
+
     # Define other standalone virtual hosts
     nginx_vhosts:
       - server_name: "example.com"
@@ -40,7 +40,7 @@
         dest: "/var/www/html/"
         owner: www-data
         group: www-data
-        mode: '0644'
+        mode: "0644"
 
     - name: Configure default server with proxy backends
       template:
