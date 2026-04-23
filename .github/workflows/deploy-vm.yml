@@ -103,4 +103,3 @@ jobs:
       - name: Terraform Output
         working-directory: ./infra/terraform
         run: terraform output
-
