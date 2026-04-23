@@ -1,4 +1,4 @@
-name: Deploy VMs with Terraform Branch_01
+name: Deploy bench_01
 
 on:
   workflow_dispatch:
