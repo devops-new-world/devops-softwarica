@@ -76,7 +76,7 @@ jobs:
           echo "${{ secrets.SSH_PUBLIC_KEY }}" > /tmp/ssh_public_key.pub
 
       - name: Terraform Plan
-        working-directory: ./k8s/infra/terraform
+        working-directory: ./infra/terraform
         env:
           TF_VAR_aws_region: ${{ inputs.default_region }}
           TF_VAR_instance_type: ${{ inputs.machine_spec }}
