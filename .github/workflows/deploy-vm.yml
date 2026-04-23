@@ -68,7 +68,7 @@ jobs:
           terraform_version: latest
 
       - name: Terraform Init
-        working-directory: ./k8s/infra/terraform
+        working-directory: ./infra/terraform
         run: terraform init
 
       - name: Setup SSH public key
@@ -95,12 +95,12 @@ jobs:
             -out=tfplan
 
       - name: Terraform Apply
-        working-directory: ./k8s/infra/terraform
+        working-directory: ./infra/terraform
         env:
           TF_VAR_public_key_file: /tmp/ssh_public_key.pub
         run: terraform apply -auto-approve tfplan
 
       - name: Terraform Output
-        working-directory: ./k8s/infra/terraform
+        working-directory: ./infra/terraform
         run: terraform output
 
