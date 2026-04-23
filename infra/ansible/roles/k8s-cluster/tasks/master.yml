@@ -1,0 +1,162 @@
+---
+- name: Check if cluster is already initialized
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: k8s_admin_conf
+  become: yes
+
+- name: Check current cluster version
+  command: kubectl get nodes -o jsonpath='{.items[0].status.nodeInfo.kubeletVersion}'
+  register: current_cluster_version
+  environment:
+    KUBECONFIG: "{{ k8s_user_home }}/.kube/config"
+  become: yes
+  when: k8s_admin_conf.stat.exists
+  changed_when: false
+  failed_when: false
+
+- name: Print current cluster version
+  debug:
+    msg:
+      - "Current cluster control plane version: {{ current_cluster_version.stdout | default('Unknown') }}"
+      - "Target version: v{{ k8s_version }}"
+      - "kubeadm version: {{ hostvars[inventory_hostname]['kubeadm_version'].stdout | default('Not checked') }}"
+  when: k8s_admin_conf.stat.exists
+
+- name: Update apt cache (master)
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Unhold Kubernetes packages for upgrade (master)
+  command: apt-mark unhold {{ item }}
+  become: yes
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+  when: k8s_admin_conf.stat.exists
+  changed_when: false
+
+- name: Upgrade Kubernetes packages on master to match version
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: latest
+    update_cache: yes
+  become: yes
+  when: k8s_admin_conf.stat.exists
+
+- name: Re-hold Kubernetes packages after upgrade (master)
+  command: apt-mark hold {{ item }}
+  become: yes
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+  when: k8s_admin_conf.stat.exists
+  changed_when: false
+
+- name: Get kubeadm version after upgrade
+  command: kubeadm version -o short
+  register: kubeadm_version_after
+  become: yes
+  when: k8s_admin_conf.stat.exists
+  changed_when: false
+  failed_when: false
+
+- name: Check current cluster control plane version
+  command: kubectl get nodes -o jsonpath='{.items[?(@.metadata.labels.node-role\.kubernetes\.io/control-plane=="" || @.metadata.labels.node-role\.kubernetes\.io/master=="")].status.nodeInfo.kubeletVersion}'
+  register: cluster_control_plane_version
+  environment:
+    KUBECONFIG: "{{ k8s_user_home }}/.kube/config"
+  become: yes
+  when: k8s_admin_conf.stat.exists
+  changed_when: false
+  failed_when: false
+
+- name: Print version information
+  debug:
+    msg:
+      - "kubeadm binary version: {{ kubeadm_version_after.stdout | default('Not checked') }}"
+      - "Cluster control plane version: {{ cluster_control_plane_version.stdout | default('Not checked') }}"
+      - "Target version: v{{ k8s_version }}"
+      - "Note: If versions don't match, cluster upgrade is needed"
+
+- name: Upgrade containerd.io to latest version (master)
+  apt:
+    name: containerd.io
+    state: latest
+  become: yes
+
+- name: Check containerd status (master)
+  ansible.builtin.command: systemctl status containerd
+  register: containerd_status
+  changed_when: false
+  become: yes
+
+- name: Initialize Kubernetes master node
+  command: >
+    kubeadm init
+    --pod-network-cidr={{ pod_network_cidr }}
+    --cri-socket=/var/run/containerd/containerd.sock
+    {{ master_init_extra_args }}
+  become: yes
+  register: kubeadm_init
+  when: not k8s_admin_conf.stat.exists
+  changed_when: "'Your Kubernetes control-plane has initialized' in kubeadm_init.stdout"
+
+- name: Extract join command from kubeadm init output
+  set_fact:
+    kubeadm_join_command: "{{ kubeadm_init.stdout | regex_search('kubeadm join.*', multiline=True) | first }}"
+  when: not k8s_admin_conf.stat.exists and kubeadm_init.changed
+
+- name: Store join command for worker nodes
+  set_fact:
+    kubeadm_join_token: "{{ kubeadm_join_command }}"
+  when: not k8s_admin_conf.stat.exists and kubeadm_init.changed
+
+- name: Create .kube directory for user
+  file:
+    path: "{{ k8s_user_home }}/.kube"
+    state: directory
+    owner: "{{ k8s_user }}"
+    group: "{{ k8s_user }}"
+    mode: '0755'
+  become: yes
+  when: k8s_user != 'root'
+
+- name: Copy kubeconfig to user home directory
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ k8s_user_home }}/.kube/config"
+    owner: "{{ k8s_user }}"
+    group: "{{ k8s_user }}"
+    mode: '0644'
+    remote_src: yes
+  become: yes
+  when: k8s_user != 'root'
+
+- name: Set KUBECONFIG environment variable for ubuntu user
+  lineinfile:
+    path: "{{ k8s_user_home }}/.bashrc"
+    line: 'export KUBECONFIG={{ k8s_user_home }}/.kube/config'
+    regexp: '^export KUBECONFIG='
+  become: yes
+  when: k8s_user != 'root'
+
+- name: Wait for master node to be ready
+  command: kubectl get nodes
+  register: k8s_nodes
+  until: "'Ready' in k8s_nodes.stdout"
+  retries: 30
+  delay: 10
+  become: yes
+  environment:
+    KUBECONFIG: "{{ k8s_user_home }}/.kube/config"
+  when: not k8s_admin_conf.stat.exists
+
+
+
