@@ -68,7 +68,7 @@ jobs:
           terraform_version: latest
 
       - name: Terraform Init
-        working-directory: /infra/terraform
+        working-directory: infra/terraform
         run: terraform init
 
       - name: Setup SSH public key
@@ -76,7 +76,7 @@ jobs:
           echo "${{ secrets.SSH_PUBLIC_KEY }}" > /tmp/ssh_public_key.pub
 
       - name: Terraform Plan
-        working-directory: /infra/terraform
+        working-directory: infra/terraform
         env:
           TF_VAR_aws_region: ${{ inputs.default_region }}
           TF_VAR_instance_type: ${{ inputs.machine_spec }}
@@ -95,11 +95,11 @@ jobs:
             -out=tfplan
 
       - name: Terraform Apply
-        working-directory: /infra/terraform
+        working-directory: infra/terraform
         env:
           TF_VAR_public_key_file: /tmp/ssh_public_key.pub
         run: terraform apply -auto-approve tfplan
 
       - name: Terraform Output
-        working-directory: /infra/terraform
+        working-directory: infra/terraform
         run: terraform output
