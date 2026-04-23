@@ -1,4 +1,4 @@
-name: Provision Nginx Server
+name: Hamro Nginx Server
 
 on:
   workflow_dispatch:
@@ -59,7 +59,7 @@ jobs:
 
       - name: Run Ansible Playbook (Key Auth)
         if: ${{ inputs.auth_method == 'key' }}
-        working-directory: ./k8s/infra/ansible/nginx/nginx
+        working-directory: ./infra/ansible/nginx/nginx
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
