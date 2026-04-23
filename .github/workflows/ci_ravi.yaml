@@ -25,3 +25,11 @@ jobs:
 
       - name: Push Docker Image
         run: docker push ravijaiswal230392/ravi:latest
+
+  deploy:
+    needs: docker-build-and-push   # ✅ FIXED HERE
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Simulate Deploy
+        run: echo "Deploy step completed successfully 🚀"
