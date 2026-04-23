@@ -1,0 +1,11 @@
+*.retry
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+.vagrant/
+*.pem
+*.key
+inventory.yml
+
+

@@ -1,0 +1,6 @@
+# Internal variables - do not override
+k8s_keyring_path: "/etc/apt/keyrings/kubernetes-archive-keyring.gpg"
+k8s_apt_list_path: "/etc/apt/sources.list.d/kubernetes.list"
+containerd_config_path: "/etc/containerd/config.toml"
+k8s_sysctl_config: "/etc/sysctl.d/kubernetes.conf"
+k8s_modules_config: "/etc/modules-load.d/k8s.conf"
