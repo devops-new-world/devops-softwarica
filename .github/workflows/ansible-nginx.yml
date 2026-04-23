@@ -1,4 +1,4 @@
-name: Provision Nginx Natak Server
+name: Provision Nginx bench-natak Server
 
 on:
   workflow_dispatch:
