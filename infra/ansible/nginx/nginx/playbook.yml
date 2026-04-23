@@ -1,0 +1,77 @@
+---
+- name: Setup Nginx Server
+  hosts: all
+  become: yes
+  vars:
+    # Define backends for the default server
+    nginx_backends: []
+    # Example backend configuration:
+    #  - path: "/app1"
+    #    proxy_pass: "http://127.0.0.1:8081"
+    
+    # Define other standalone virtual hosts
+    nginx_vhosts:
+      - server_name: "example.com"
+        port: 80
+        root: "/var/www/example"
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Ensure Nginx service is running and enabled
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Remove default Nginx site config provided by package
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload Nginx
+
+    - name: Deploy default landing page
+      copy:
+        src: "../../../../../sites/"
+        dest: "/var/www/html/"
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Configure default server with proxy backends
+      template:
+        src: templates/default.conf.j2
+        dest: /etc/nginx/sites-available/default.conf
+      notify: Reload Nginx
+
+    - name: Enable default server
+      file:
+        src: /etc/nginx/sites-available/default.conf
+        dest: /etc/nginx/sites-enabled/default.conf
+        state: link
+      notify: Reload Nginx
+
+    - name: Configure other virtual hosts
+      template:
+        src: templates/vhost.conf.j2
+        dest: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
+      loop: "{{ nginx_vhosts | default([]) }}"
+      notify: Reload Nginx
+
+    - name: Enable other virtual hosts
+      file:
+        src: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
+        dest: "/etc/nginx/sites-enabled/{{ item.server_name }}.conf"
+        state: link
+      loop: "{{ nginx_vhosts | default([]) }}"
+      notify: Reload Nginx
+
+  handlers:
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded

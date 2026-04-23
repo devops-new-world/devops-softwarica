@@ -1,0 +1,93 @@
+---
+- name: Install required packages for Docker repository
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+  become: yes
+
+- name: Create directory for Docker keyring
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Add Docker's official GPG key
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+  become: yes
+
+- name: Get OS codename
+  shell: . /etc/os-release && echo $VERSION_CODENAME
+  register: os_codename
+  changed_when: false
+
+- name: Get system architecture
+  shell: dpkg --print-architecture
+  register: system_arch
+  changed_when: false
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch={{ system_arch.stdout }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ os_codename.stdout }} stable"
+    filename: docker
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Install containerd
+  apt:
+    name: containerd.io
+    state: present
+  become: yes
+
+- name: Create containerd config directory
+  file:
+    path: /etc/containerd
+    state: directory
+  become: yes
+
+- name: Generate default containerd configuration
+  command: containerd config default
+  register: containerd_default_config
+  changed_when: false
+  become: yes
+
+- name: Write containerd configuration
+  copy:
+    content: "{{ containerd_default_config.stdout }}"
+    dest: "{{ containerd_config_path }}"
+  become: yes
+  notify: restart containerd
+
+- name: Configure containerd to use systemd cgroup driver
+  lineinfile:
+    path: "{{ containerd_config_path }}"
+    regexp: '^\s*SystemdCgroup\s*='
+    line: '            SystemdCgroup = true'
+    insertafter: '\[plugins\."io\.containerd\.grpc\.v1\.cri"\.containerd\.runtimes\.runc\.options\]'
+  become: yes
+  notify: restart containerd
+
+- name: Ensure containerd is enabled and started
+  systemd:
+    name: containerd
+    enabled: yes
+    state: started
+  become: yes
+
+- name: Test containerd connection
+  command: crictl info
+  become: yes
+  changed_when: false
+  register: crictl_info
+  failed_when: false
+
+
+
