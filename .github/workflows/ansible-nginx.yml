@@ -1,4 +1,4 @@
-name: Hamro Nginx Server
+name: Provision Nginx Server
 
 on:
   workflow_dispatch:
@@ -46,17 +46,15 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ inputs.server_ip }} >> ~/.ssh/known_hosts
-
       - name: Run Ansible Playbook (Password Auth)
         if: ${{ inputs.auth_method == 'password' }}
-        working-directory: ./k8s/infra/ansible/nginx/nginx
+        working-directory: ./infra/ansible/nginx/nginx
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
           echo "${{ inputs.server_ip }} ansible_user=${{ inputs.ssh_user }} ansible_ssh_pass='${{ inputs.ssh_password }}'" > inventory.ini
           ansible all -i inventory.ini -m ping
           ansible-playbook -i inventory.ini playbook.yml
-
       - name: Run Ansible Playbook (Key Auth)
         if: ${{ inputs.auth_method == 'key' }}
         working-directory: ./infra/ansible/nginx/nginx
