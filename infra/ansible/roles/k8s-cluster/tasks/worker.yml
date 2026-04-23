@@ -1,0 +1,82 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Upgrade containerd.io to latest version
+  apt:
+    name: containerd.io
+    state: latest
+  become: yes
+
+- name: Check containerd status
+  ansible.builtin.command: systemctl status containerd
+  register: containerd_status
+  changed_when: false
+  become: yes
+  
+- name: Get master node IP address
+  set_fact:
+    master_ip: "{{ hostvars[groups['k8s_master'][0]]['ansible_default_ipv4']['address'] }}"
+  when: groups['k8s_master'] | length > 0
+
+- name: Get master node private IP (preferred)
+  set_fact:
+    master_ip: "{{ hostvars[groups['k8s_master'][0]]['k8s_private_ip'] | default(hostvars[groups['k8s_master'][0]]['ansible_default_ipv4']['address']) }}"
+  when: groups['k8s_master'] | length > 0 and hostvars[groups['k8s_master'][0]].get('k8s_private_ip') is defined
+
+- name: Print master node IP information
+  debug:
+    msg:
+      - "Master Node Public IP: {{ hostvars[groups['k8s_master'][0]]['ansible_host'] | default('N/A') }}"
+      - "Master Node Private IP: {{ hostvars[groups['k8s_master'][0]]['k8s_private_ip'] | default(hostvars[groups['k8s_master'][0]]['ansible_default_ipv4']['address'] | default('N/A')) }}"
+      - "Master Node Default IPv4: {{ hostvars[groups['k8s_master'][0]]['ansible_default_ipv4']['address'] | default('N/A') }}"
+      - "Selected Master IP (for join): {{ master_ip | default('N/A') }}"
+  when: groups['k8s_master'] | length > 0
+
+- name: Check if node is already joined
+  stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: k8s_kubelet_conf
+  become: yes
+
+- name: Get join command from master node
+  command: kubeadm token create --print-join-command
+  register: join_command_result
+  become: yes
+  delegate_to: "{{ groups['k8s_master'][0] }}"
+  environment:
+    KUBECONFIG: "{{ '/etc/kubernetes/admin.conf' if (hostvars[groups['k8s_master'][0]].get('k8s_user', 'root') == 'root') else (hostvars[groups['k8s_master'][0]].get('k8s_user_home', '/home/' + hostvars[groups['k8s_master'][0]]['ansible_user']) + '/.kube/config') }}"
+  when: not k8s_kubelet_conf.stat.exists and groups['k8s_master'] | length > 0
+  changed_when: false
+
+- name: Print join command result
+  debug:
+    var: join_command_result
+  when: join_command_result is defined
+
+- name: Print join command (stdout only)
+  debug:
+    msg: "Join command: {{ join_command_result.stdout }}"
+  when: join_command_result is defined and join_command_result.stdout is defined
+
+- name: Join worker node to cluster
+  command: "{{ join_command_result.stdout }}"
+  become: yes
+  register: kubeadm_join
+  when: not k8s_kubelet_conf.stat.exists and groups['k8s_master'] | length > 0
+  async: "{{ worker_join_timeout }}"
+  poll: 10
+
+- name: Wait for kubelet to be ready
+  systemd:
+    name: kubelet
+    state: started
+  become: yes
+  register: kubelet_status
+  until: kubelet_status.status.ActiveState == "active"
+  retries: 30
+  delay: 5
+  when: not k8s_kubelet_conf.stat.exists
+

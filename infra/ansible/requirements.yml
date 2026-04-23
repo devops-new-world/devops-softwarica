@@ -1,0 +1,10 @@
+---
+# Ansible role requirements (if using external roles in the future)
+# Currently, the k8s-cluster role is local
+
+# Example external role usage:
+# - src: geerlingguy.docker
+#   version: "4.0.0"
+
+
+
