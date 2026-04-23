@@ -1,0 +1,75 @@
+---
+- name: Wait for master node to be fully ready
+  command: kubectl get nodes --no-headers
+  register: nodes_status
+  until: "'Ready' in nodes_status.stdout"
+  retries: 30
+  delay: 10
+  become: yes
+  environment:
+    KUBECONFIG: "{{ '/etc/kubernetes/admin.conf' if k8s_user == 'root' else k8s_user_home + '/.kube/config' }}"
+  changed_when: false
+
+- name: Check if Calico is already installed
+  command: kubectl get pods -n kube-system -l k8s-app=calico-node --no-headers
+  register: calico_pods
+  become: yes
+  environment:
+    KUBECONFIG: "{{ '/etc/kubernetes/admin.conf' if k8s_user == 'root' else k8s_user_home + '/.kube/config' }}"
+  failed_when: false
+  changed_when: false
+
+- name: Install Calico CNI
+  command: kubectl apply -f {{ calico_manifest_url }}
+  become: yes
+  environment:
+    KUBECONFIG: "{{ '/etc/kubernetes/admin.conf' if k8s_user == 'root' else k8s_user_home + '/.kube/config' }}"
+  when: calico_pods.rc != 0 or calico_pods.stdout == ""
+
+- name: Wait for Calico pods to be ready
+  command: kubectl get pods -n kube-system -l k8s-app=calico-node --no-headers
+  register: calico_status
+  until: "'Running' in calico_status.stdout and calico_status.stdout.count('Running') >= (groups['k8s_workers'] | default([]) | length + groups['k8s_master'] | default([]) | length)"
+  retries: 60
+  delay: 10
+  become: yes
+  environment:
+    KUBECONFIG: "{{ '/etc/kubernetes/admin.conf' if k8s_user == 'root' else k8s_user_home + '/.kube/config' }}"
+  changed_when: false
+
+- name: Get all worker nodes
+  command: kubectl get nodes --no-headers -o custom-columns=NAME:.metadata.name
+  register: worker_nodes_list
+  become: yes
+  environment:
+    KUBECONFIG: "{{ '/etc/kubernetes/admin.conf' if k8s_user == 'root' else k8s_user_home + '/.kube/config' }}"
+  changed_when: false
+
+- name: Label worker nodes
+  command: "kubectl label node {{ item }} {{ label_item }} --overwrite"
+  become: yes
+  environment:
+    KUBECONFIG: "{{ '/etc/kubernetes/admin.conf' if k8s_user == 'root' else k8s_user_home + '/.kube/config' }}"
+  loop: "{{ worker_nodes_list.stdout_lines }}"
+  loop_control:
+    label: "{{ item }}"
+  vars:
+    label_item: "{{ worker_node_labels[0] }}"
+  when: 
+    - worker_nodes_list.stdout_lines | length > 0
+    - worker_node_labels | length > 0
+    - "'master' not in item | lower and 'control-plane' not in item | lower"
+  ignore_errors: yes
+
+- name: Display cluster status
+  command: kubectl get nodes
+  become: yes
+  environment:
+    KUBECONFIG: "{{ '/etc/kubernetes/admin.conf' if k8s_user == 'root' else k8s_user_home + '/.kube/config' }}"
+  register: cluster_status
+  changed_when: false
+
+- name: Show cluster status
+  debug:
+    msg: "{{ cluster_status.stdout_lines }}"
+
