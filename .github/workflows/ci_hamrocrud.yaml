@@ -50,7 +50,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
           rijen@eef1df54591c.mylabserver.com "
             docker pull rezenn/rijen:latest &&
-            docker stop hamrocrud || true &&
-            docker rm hamrocrud || true &&
-            docker run -d --name hamrocrud -p 80:80 rezenn/rijen:latest
+            docker stop hamrocrud 2>/dev/null || true &&
+            docker rm hamrocrud 2>/dev/null || true &&
+            docker run -d --name hamrocrud -p 8080:80 rezenn/rijen:latest
           "
