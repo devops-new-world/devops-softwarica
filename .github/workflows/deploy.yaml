@@ -1,4 +1,4 @@
-name: Deploy Natak website
+name: Natak CI/CD
 
 on:
   push:
@@ -6,10 +6,33 @@ on:
       - "bench-natak"
 
 jobs:
-  docker_build:
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep scan --config auto --error ./sites/natak
+
+  trivy:
+    name: Trivy Scan
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: ./sites/natak
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
+  docker_build:
+    name: Build and Push Docker Image
+    needs: [semgrep, trivy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
@@ -24,13 +47,14 @@ jobs:
           docker push ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/bench-natak:latest
 
   deploy:
+    name: Deploy to Server
     needs: docker_build
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: eef1df54591c.mylabserver.com
+          host: ${{ secrets.SAMBANDHA_SERVER_HOST }}
           username: ${{ secrets.SAMBANDHA_SERVER_USERNAME }}
           key: ${{ secrets.SAMBANDHA_SSH_KEY }}
           script: |
