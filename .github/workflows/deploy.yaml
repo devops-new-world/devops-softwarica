@@ -11,7 +11,6 @@ on:
       - ".env.example"
       - "sites/natak/**"
       - "sites/natak-backend/**"
-  workflow_dispatch:
 
 env:
   FRONTEND_IMAGE_NAME: bench-natak-frontend
