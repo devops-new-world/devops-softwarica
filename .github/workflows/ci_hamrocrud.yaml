@@ -36,22 +36,17 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-
-          # write private key safely (prevents formatting issues)
           printf "%s" "${{ secrets.RIJEN_SECRET }}" > ~/.ssh/id_rsa
-
           chmod 600 ~/.ssh/id_rsa
-
-          # trust server
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H eef1df54591c.mylabserver.com >> ~/.ssh/known_hosts
 
       - name: Test SSH Connection
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-          rijen@${{ secrets.HOST }} "echo SSH OK"
+          rijen@eef1df54591c.mylabserver.com "echo SSH OK"
 
       - name: Copy files via SCP
         run: |
           scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
           sites/HamroCRUD/index.html \
-          rijen@${{ secrets.HOST }}:/var/www/html/rijen/
+          rijen@eef1df54591c.mylabserver.com:/var/www/html/rijen/
