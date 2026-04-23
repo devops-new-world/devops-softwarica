@@ -33,7 +33,7 @@
     # ✅ FIXED TASK (NO RELATIVE PATHS)
     - name: Deploy default landing page
       copy:
-        src: public/
+        src: "../../../../sites/bench/start.html"
         dest: /var/www/html/
         owner: www-data
         group: www-data
