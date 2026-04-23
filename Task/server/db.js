@@ -3,8 +3,15 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString || typeof connectionString !== 'string') {
+  console.error('ERROR: Missing or invalid DATABASE_URL environment variable.');
+  console.error('Copy server/.env.example to server/.env and set DATABASE_URL with your PostgreSQL connection string.');
+  process.exit(1);
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString,
 });
 
 pool.on('error', (err) => {

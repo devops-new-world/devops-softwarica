@@ -64,13 +64,43 @@ header p {
   margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+}
+
+.item-list li.task-done {
+  opacity: 0.8;
+}
+
+.task-summary {
+  flex: 1;
+}
+
+.task-summary strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.task-status {
+  display: inline-block;
+  margin-left: 12px;
+  padding: 2px 8px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.task-summary p {
+  margin: 8px 0 0;
+  color: #4b5563;
 }
 
 .item-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .item-actions button {

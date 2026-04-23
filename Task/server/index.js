@@ -11,71 +11,92 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/items', async (req, res) => {
+async function initDb() {
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+}
+
+app.get('/api/tasks', async (req, res) => {
   try {
-    const result = await db.query('SELECT * FROM items ORDER BY id ASC');
+    const result = await db.query('SELECT * FROM tasks ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to load items' });
+    res.status(500).json({ error: 'Failed to load tasks' });
   }
 });
 
-app.post('/api/items', async (req, res) => {
-  const { name } = req.body;
-  if (!name) {
-    return res.status(400).json({ error: 'Name is required' });
+app.post('/api/tasks', async (req, res) => {
+  const { title, description } = req.body;
+  if (!title) {
+    return res.status(400).json({ error: 'Title is required' });
   }
 
   try {
     const result = await db.query(
-      'INSERT INTO items (name) VALUES ($1) RETURNING *',
-      [name]
+      'INSERT INTO tasks (title, description) VALUES ($1, $2) RETURNING *',
+      [title, description || null]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to create item' });
+    res.status(500).json({ error: 'Failed to create task' });
   }
 });
 
-app.put('/api/items/:id', async (req, res) => {
+app.put('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
-  const { name } = req.body;
-  if (!name) {
-    return res.status(400).json({ error: 'Name is required' });
+  const { title, description, status } = req.body;
+  if (!title) {
+    return res.status(400).json({ error: 'Title is required' });
   }
+
+  const safeStatus = status === 'done' ? 'done' : 'pending';
 
   try {
     const result = await db.query(
-      'UPDATE items SET name = $1 WHERE id = $2 RETURNING *',
-      [name, id]
+      'UPDATE tasks SET title = $1, description = $2, status = $3 WHERE id = $4 RETURNING *',
+      [title, description || null, safeStatus, id]
     );
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Item not found' });
+      return res.status(404).json({ error: 'Task not found' });
     }
     res.json(result.rows[0]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to update item' });
+    res.status(500).json({ error: 'Failed to update task' });
   }
 });
 
-app.delete('/api/items/:id', async (req, res) => {
+app.delete('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    const result = await db.query('DELETE FROM items WHERE id = $1 RETURNING *', [id]);
+    const result = await db.query('DELETE FROM tasks WHERE id = $1 RETURNING *', [id]);
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Item not found' });
+      return res.status(404).json({ error: 'Task not found' });
     }
     res.json({ success: true });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to delete item' });
+    res.status(500).json({ error: 'Failed to delete task' });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`);
-});
+initDb()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Server listening on http://localhost:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Failed to initialize database', error);
+    process.exit(1);
+  });
