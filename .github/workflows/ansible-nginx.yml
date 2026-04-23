@@ -1,6 +1,9 @@
 name: Provision Nginx Server
 
 on:
+  push:
+    branches:
+      - "bench-natak"
   workflow_dispatch:
     inputs:
       server_ip:
