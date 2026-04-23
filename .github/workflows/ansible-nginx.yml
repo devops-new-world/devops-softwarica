@@ -7,13 +7,11 @@ on:
         description: 'Target Server IP Address'
         required: true
         type: string
-
       ssh_user:
         description: 'SSH User'
         required: true
         type: string
         default: 'ubuntu'
-
       auth_method:
         description: 'SSH Authentication Method'
         required: true
@@ -22,7 +20,6 @@ on:
           - 'password'
           - 'key'
         default: 'password'
-
       ssh_password:
         description: 'SSH Password (only used if auth_method is password)'
         required: false
@@ -33,15 +30,14 @@ jobs:
   provision-nginx:
     name: Run Ansible Playbook
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass ansible
+      - name: Install sshpass
+        if: ${{ inputs.auth_method == 'password' }}
+        run: sudo apt-get update && sudo apt-get install -y sshpass
 
       - name: Setup SSH Key
         if: ${{ inputs.auth_method == 'key' }}
@@ -53,17 +49,17 @@ jobs:
 
       - name: Run Ansible Playbook (Password Auth)
         if: ${{ inputs.auth_method == 'password' }}
-        working-directory: infra/ansible/nginx/nginx
+        working-directory: ./infra/ansible/nginx/nginx
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
-          echo "${{ inputs.server_ip }} ansible_user=${{ inputs.ssh_user }} ansible_ssh_pass=${{ inputs.ssh_password }}" > inventory.ini
+          echo "${{ inputs.server_ip }} ansible_user=${{ inputs.ssh_user }} ansible_ssh_pass='${{ inputs.ssh_password }}'" > inventory.ini
           ansible all -i inventory.ini -m ping
           ansible-playbook -i inventory.ini playbook.yml
 
       - name: Run Ansible Playbook (Key Auth)
         if: ${{ inputs.auth_method == 'key' }}
-        working-directory: infra/ansible/nginx/nginx
+        working-directory: ./infra/ansible/nginx/nginx
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
