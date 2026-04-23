@@ -1,3 +1,3 @@
 FROM nginx:latest
 
-COPY sites/rijen/index.html /usr/share/nginx/html/index.html
+COPY sites/HamroCRUD/index.html /usr/share/nginx/html/index.html

@@ -53,5 +53,5 @@ jobs:
       - name: Copy files via SCP
         run: |
           scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-          sites/rijen/index.html \
+          sites/HamroCRUD/index.html \
           rijen@${{ secrets.HOST }}:/var/www/html/rijen/
