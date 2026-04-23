@@ -1,4 +1,4 @@
-name: Natak CI/CD
+name: Deploy Natak Website with SAST
 
 on:
   push:
