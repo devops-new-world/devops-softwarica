@@ -45,12 +45,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
           rijen@eef1df54591c.mylabserver.com "echo SSH OK"
 
-      - name: Deploy Docker Container on Server
+      - name: Copy files via SCP
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-          rijen@eef1df54591c.mylabserver.com "
-            docker pull rezenn/rijen:latest &&
-            docker stop hamrocrud 2>/dev/null || true &&
-            docker rm hamrocrud 2>/dev/null || true &&
-            docker run -d --name hamrocrud -p 8080:80 rezenn/rijen:latest
-          "
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
+          sites/HamroCRUD/index.html \
+          rijen@eef1df54591c.mylabserver.com:/var/www/html/rijen/
