@@ -1,0 +1,34 @@
+name: Ansible Deploy Site
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible + sshpass
+        run: |
+          sudo apt update
+          sudo apt install -y ansible sshpass
+
+      - name: Create inventory
+        run: |
+          echo "[web]" > inventory.ini
+          echo "benchvm ansible_host=54.242.136.129 ansible_user=ubuntu ansible_ssh_pass=changeme" >> inventory.ini
+
+      - name: Disable host key checking
+        run: |
+          echo -e "[defaults]\nhost_key_checking = False" > ansible.cfg
+
+      - name: Test connection
+        run: |
+          ansible -i inventory.ini web -m ping
+
+      - name: Run playbook
+        run: |
+          ansible-playbook -i inventory.ini infra/ansible/deploy-site.yml

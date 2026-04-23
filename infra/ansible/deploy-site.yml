@@ -1,0 +1,23 @@
+---
+- name: Deploy Bench-Shothai Website
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Start nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Copy website
+      copy:
+        src: "{{ playbook_dir }}/../../sites/index.html"
+        dest: /var/www/html/index.html
+        force: yes
