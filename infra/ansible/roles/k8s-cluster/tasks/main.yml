@@ -1,28 +1,28 @@
 ---
 - name: Include common prerequisites tasks
-  ansible.builtin.include_tasks: prerequisites.yml
+  include_tasks: prerequisites.yml
   tags: prerequisites
 
 - name: Include containerd installation tasks
-  ansible.builtin.include_tasks: containerd.yml
+  include_tasks: containerd.yml
   tags: containerd
 
 - name: Include Kubernetes installation tasks
-  ansible.builtin.include_tasks: k8s_install.yml
+  include_tasks: k8s_install.yml
   tags: k8s_install
 
 - name: Include master node tasks
-  ansible.builtin.include_tasks: master.yml
+  include_tasks: master.yml
   when: inventory_hostname in groups['k8s_master']
   tags: master
 
 - name: Include worker node tasks
-  ansible.builtin.include_tasks: worker.yml
+  include_tasks: worker.yml
   when: inventory_hostname in groups['k8s_workers']
   tags: worker
 
 - name: Include CNI installation tasks
-  ansible.builtin.include_tasks: cni.yml
+  include_tasks: cni.yml
   when: inventory_hostname in groups['k8s_master'] | first
   tags: cni
 

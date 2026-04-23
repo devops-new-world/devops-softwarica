@@ -7,7 +7,7 @@
     mode: '0755'
 
 - name: Remove all old Kubernetes repo list files
-  ansible.builtin.shell: |
+  shell: |
     rm -f /etc/apt/sources.list.d/*kube*
     rm -f /etc/apt/sources.list.d/*k8s*
     rm -f /etc/apt/sources.list.d/*kubernetes*

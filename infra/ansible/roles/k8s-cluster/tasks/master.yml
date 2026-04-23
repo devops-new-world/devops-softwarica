@@ -92,7 +92,7 @@
   become: yes
 
 - name: Check containerd status (master)
-  ansible.builtin.command: systemctl status containerd
+  command: systemctl status containerd
   register: containerd_status
   changed_when: false
   become: yes
