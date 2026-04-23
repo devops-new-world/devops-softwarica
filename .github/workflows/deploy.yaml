@@ -3,7 +3,7 @@ name: Deploy Natak Website with SAST
 on:
   push:
     branches:
-      - "bench-natak"
+      - "o"
 
 jobs:
   semgrep:
