@@ -1,4 +1,4 @@
-name: Deploy bench01 website
+name: Bench Docker Build & Deploy
 
 on:
   push:
@@ -11,6 +11,7 @@ env:
   BENCH_PORT: "22"
   BENCH_USER: ${{ secrets.BENCH01 }}
   BENCH_KEY: ${{ secrets.PRAVESH }}
+  BENCH_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/bench01:latest
 
 jobs:
   preflight:
@@ -44,34 +45,65 @@ jobs:
 
           echo "can_deploy=true" >> "$GITHUB_OUTPUT"
 
+  docker-build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Bench Image
+        run: |
+          docker build -f sites/bench/Dockerfile -t "${BENCH_IMAGE}" sites/bench
+          docker push "${BENCH_IMAGE}"
+
   deploy:
-    needs: preflight
+    needs:
+      - preflight
+      - docker-build-and-push
     if: needs.preflight.outputs.can_deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Copy files via SCP
         uses: appleboy/scp-action@v1
         with:
-          host: eef1df54591c.mylabserver.com
-          username: ${{ secrets.BENCH01 }}
-          key: ${{ secrets.PRAVESH }}
+          host: ${{ env.BENCH_HOST }}
+          username: ${{ env.BENCH_USER }}
+          key: ${{ env.PRAVESH }}
+          port: ${{ env.BENCH_PORT }}
           source: "./*"
           target: /opt/bench-01
+
       - name: Run Docker Compose on remote server
         run: |
           # Create SSH directory
           mkdir -p ~/.ssh
 
           # Write SSH key to file
-          echo "${{ secrets.PRAVESH }}" > ~/.ssh/id_ed25519
+          echo "${{ env.PRAVESH }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
           # Add remote host to known_hosts to avoid prompt
-          ssh-keyscan -H eef1df54591c.mylabserver.com >> ~/.ssh/known_hosts
+          ssh-keyscan -p "${{ env.BENCH_PORT }}" -H "${{ env.BENCH_HOST }}" >> ~/.ssh/known_hosts
 
           # Run Docker Compose remotely
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.BENCH01 }}@eef1df54591c.mylabserver.com \
+          ssh -i ~/.ssh/id_ed25519 -p "${{ env.BENCH_PORT }}" "${{ env.BENCH_USER }}@${{ env.BENCH_HOST }}" \
             "cd /opt/bench-01 && docker compose up -d"
+
+  deploy-skipped:
+    needs:
+      - preflight
+      - docker-build-and-push
+    if: needs.preflight.outputs.can_deploy != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report skip reason
+        run: echo "Deploy skipped because host is offline/unresolvable or required server secrets are missing. Docker image push still ran."
