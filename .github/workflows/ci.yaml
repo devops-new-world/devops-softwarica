@@ -3,21 +3,35 @@ name: Deploy My website
 on:
   push:
     branches:
-    - "main"
-jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - name: checkout code
-              uses: actions/checkout@v4
-            
-            - name: Set up SSH
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+      - "**"
 
-            - name: Copy files via SSH
-              run: |
-                scp -i ~/.ssh/id_rsa sites/trainer/index.html ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/trainer
+jobs:
+  deploy:
+    if: github.ref != 'refs/heads/bench_01'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.KEY }}
+          SSH_HOST: ${{ secrets.HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        run: |
+          ssh -i ~/.ssh/id_rsa -o BatchMode=yes ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'whoami && hostname && ls -ld /var/www/html/pravesh'
+
+      - name: Copy files via SSH
+        env:
+          SSH_USER: ${{ secrets.USERNAME }}
+          SSH_HOST: ${{ secrets.HOST }}
+        run: |
+          ssh -i ~/.ssh/id_rsa "$SSH_USER@$SSH_HOST" "mkdir -p /var/www/html/trainer"
+          scp -i ~/.ssh/id_rsa sites/trainer/index.html "$SSH_USER@$SSH_HOST:/var/www/html/trainer/index.html"

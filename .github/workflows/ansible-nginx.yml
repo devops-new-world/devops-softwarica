@@ -1,4 +1,4 @@
-name: Provision Nginx Server Hamro
+name: Provision Nginx Bench_01 Server
 
 on:
   workflow_dispatch:
@@ -35,6 +35,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
       - name: Install sshpass
         if: ${{ inputs.auth_method == 'password' }}
         run: sudo apt-get update && sudo apt-get install -y sshpass
@@ -58,7 +63,7 @@ jobs:
 
       - name: Run Ansible Playbook (Key Auth)
         if: ${{ inputs.auth_method == 'key' }}
-        working-directory: ./k8s/infra/ansible/nginx/nginx
+        working-directory: ./infra/ansible/nginx/nginx
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
