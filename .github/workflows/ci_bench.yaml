@@ -21,7 +21,7 @@ jobs:
       - name: Deploy files to AWS EC2
         uses: appleboy/scp-action@v1
         with:
-          host: ${{ github.event.inputs.server_ip || '34.230.2.91' }}
+          host: ${{ github.event.inputs.server_ip || '34.239.160.170' }}
           username: ubuntu
           password: ${{ secrets.EC2_PASSWORD }}
           source: "sites/bench/start.html"
@@ -30,7 +30,7 @@ jobs:
       - name: Install Nginx and Deploy Site
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ github.event.inputs.server_ip || '34.230.2.91' }}
+          host: ${{ github.event.inputs.server_ip || '34.239.160.170' }}
           username: ubuntu
           password: ${{ secrets.EC2_PASSWORD }}
           script: |
@@ -41,7 +41,7 @@ jobs:
             sudo chown -R www-data:www-data /var/www/html/
             sudo systemctl enable nginx
             sudo systemctl start nginx
-            echo "✅ Nginx deployed! Visit: http://${{ github.event.inputs.server_ip || '34.230.2.91' }}"
+            echo "✅ Nginx deployed! Visit: http://${{ github.event.inputs.server_ip || '34.239.160.170' }}"
 
   docker-build-and-push:
     runs-on: ubuntu-latest
