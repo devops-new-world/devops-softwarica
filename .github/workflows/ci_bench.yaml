@@ -1,0 +1,60 @@
+name: Deploy Bench 01 to AWS
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      server_ip:
+        description: 'AWS EC2 Instance IP (get from Terraform output)'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        
+      - name: Deploy files to AWS EC2
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ github.event.inputs.server_ip || '34.239.160.170' }}
+          username: ubuntu
+          password: ${{ secrets.EC2_PASSWORD }}
+          source: "sites/bench/start.html"
+          target: /tmp/
+          
+      - name: Install Nginx and Deploy Site
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ github.event.inputs.server_ip || '34.239.160.170' }}
+          username: ubuntu
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            sudo apt-get update -y
+            sudo apt-get install -y nginx
+            sudo mkdir -p /var/www/html/
+            sudo cp /tmp/sites/bench/start.html /var/www/html/index.html
+            sudo chown -R www-data:www-data /var/www/html/
+            sudo systemctl enable nginx
+            sudo systemctl start nginx
+            echo "✅ Nginx deployed! Visit: http://${{ github.event.inputs.server_ip || '34.239.160.170' }}"
+
+  docker-build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -f sites/pravesh/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/pravesh:latest sites/pravesh
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pravesh:latest
