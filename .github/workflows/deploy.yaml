@@ -2,8 +2,8 @@ name: Deploy Natak Full Stack App in vm
 
 on:
   push:
-    branches:
-      - "bench-natak"
+    tags:
+      - "**"
     paths:
       - ".github/workflows/deploy.yaml"
       - "docker-compose.yml"
