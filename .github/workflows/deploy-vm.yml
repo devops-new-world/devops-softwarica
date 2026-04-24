@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       access_key_id:
-        description: 'AWS Access Key ID'
+        description: "AWS Access Key ID"
         required: true
         type: string
       secret_access_key: 
@@ -12,45 +12,45 @@ on:
         required: true
         type: string
       default_region:
-        description: 'AWS Default Region'
+        description: "AWS Default Region"
         required: true
         type: string
-        default: 'us-east-1'
+        default: "us-east-1"
       vm_type:
-        description: 'Type of VM to deploy'
+        description: "Type of VM to deploy"
         required: true
         type: choice
         options:
-          - 'general'
-          - 'cluster'
-        default: 'general'
+          - "general"
+          - "cluster"
+        default: "general"
       server_count:
-        description: 'EC2 Instance Count (Server Nodes, max 7)'
+        description: "EC2 Instance Count (Server Nodes, max 7)"
         required: true
         type: choice
         options:
-          - '1'
-          - '2'
-          - '3'
-          - '4'
-          - '5'
-          - '6'
-          - '7'
-        default: '2'
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+          - "7"
+        default: "2"
       machine_spec:
-        description: 'Machine Instance Type'
+        description: "Machine Instance Type"
         required: true
         type: choice
         options:
-          - 't3.small'
-          - 't3.medium'
-        default: 't3.small'
+          - "t3.small"
+          - "t3.medium"
+        default: "t3.small"
 
 jobs:
   terraform-deploy:
     name: Deploy Infrastructure with Terraform
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -103,4 +103,3 @@ jobs:
       - name: Terraform Output
         working-directory: ./infra/terraform
         run: terraform output
-

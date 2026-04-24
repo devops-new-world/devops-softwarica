@@ -15,7 +15,7 @@
   register: containerd_status
   changed_when: false
   become: yes
-  
+
 - name: Get master node IP address
   set_fact:
     master_ip: "{{ hostvars[groups['k8s_master'][0]]['ansible_default_ipv4']['address'] }}"
@@ -79,4 +79,3 @@
   retries: 30
   delay: 5
   when: not k8s_kubelet_conf.stat.exists
-

@@ -16,6 +16,3 @@
     state: restarted
     enabled: yes
   become: yes
-
-
-

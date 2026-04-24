@@ -4,10 +4,12 @@ server {
 
     server_name {{ item.server_name }};
 
-    root {{ item.root | default('/var/www/html') }};
-    index index.html index.htm;
-
     location / {
-        try_files $uri $uri/ =404;
+        proxy_pass {{ item.proxy_pass | default(frontend_proxy_pass) }};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }

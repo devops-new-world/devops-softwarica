@@ -25,6 +25,3 @@
   include_tasks: cni.yml
   when: inventory_hostname in groups['k8s_master'] | first
   tags: cni
-
-
-

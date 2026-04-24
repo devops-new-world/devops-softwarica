@@ -1,0 +1,133 @@
+name: Deploy Natak Full Stack App in vm
+
+on:
+  push:
+    tags:
+      - "**"
+    paths:
+      - ".github/workflows/deploy.yaml"
+      - "docker-compose.yml"
+      - "docker-compose.prod.yml"
+      - ".env.example"
+      - "sites/natak/**"
+      - "sites/natak-backend/**"
+
+env:
+  FRONTEND_IMAGE_NAME: bench-natak-frontend
+  BACKEND_IMAGE_NAME: bench-natak-backend
+
+jobs:
+  semgrep:
+    name: Semgrep Scan
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep scan --config auto --error ./sites/natak ./sites/natak-backend
+
+  trivy:
+    name: Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
+  build_and_push:
+    name: Build and Push Docker Images
+    needs: [semgrep, trivy]
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: meta
+        run: echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}
+          password: ${{ secrets.NATAK_DOCKERHUB_TOKEN }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./sites/natak
+          file: ./sites/natak/Dockerfile
+          push: true
+          build-args: |
+            VITE_API_BASE_URL=/api
+          tags: |
+            ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
+            ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./sites/natak-backend
+          file: ./sites/natak-backend/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE_NAME }}:latest
+            ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}
+
+  deploy:
+    name: Deploy to Server
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SAMBANDHA_SERVER_HOST }}
+          username: ${{ secrets.SAMBANDHA_SERVER_USERNAME }}
+          key: ${{ secrets.SAMBANDHA_SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "~/natak-app"
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.SAMBANDHA_DOCKER_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.NATAK_DOCKERHUB_TOKEN }}
+          IMAGE_TAG: ${{ needs.build_and_push.outputs.image_tag }}
+          FRONTEND_PORT: ${{ secrets.NATAK_FRONTEND_PORT }}
+          BACKEND_PORT: ${{ secrets.NATAK_BACKEND_PORT }}
+          CORS_ORIGIN: ${{ secrets.NATAK_CORS_ORIGIN }}
+        with:
+          host: ${{ secrets.SAMBANDHA_SERVER_HOST }}
+          username: ${{ secrets.SAMBANDHA_SERVER_USERNAME }}
+          key: ${{ secrets.SAMBANDHA_SSH_KEY }}
+          envs: DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,IMAGE_TAG,FRONTEND_PORT,BACKEND_PORT,CORS_ORIGIN
+          script: |
+            mkdir -p ~/natak-app
+            cat <<EOF > ~/natak-app/.env
+            DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}
+            IMAGE_TAG=${IMAGE_TAG}
+            FRONTEND_PORT=${FRONTEND_PORT:-80}
+            BACKEND_PORT=${BACKEND_PORT:-5000}
+            VITE_API_BASE_URL=/api
+            CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:80}
+            EOF
+
+            echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+            cd ~/natak-app
+            docker stop natak-site || true
+            docker rm natak-site || true
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans

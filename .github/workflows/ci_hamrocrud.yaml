@@ -1,0 +1,68 @@
+name: Deploy HamroCRUD website
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      server_ip:
+        description: "AWS EC2 Instance IP"
+        required: false
+        type: string
+
+jobs:
+  docker-build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: rezenn
+          password: ${{ secrets.RIJEN_DOCKER_TOKEN }}
+
+      - name: Build Docker Image
+        run: docker build -t rezenn/rijen:latest .
+
+      - name: Push Docker Image
+        run: docker push rezenn/rijen:latest
+
+  deploy:
+    needs: docker-build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Copy index.html to Server
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ github.event.inputs.server_ip || '3.210.181.28' }}
+          username: ubuntu
+          password: ${{ secrets.EC2_PASSWORD }}
+          source: "sites/HamroCRUD/index.html"
+          target: /tmp/
+
+      - name: Deploy on Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ github.event.inputs.server_ip || '3.210.181.28' }}
+          username: ubuntu
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            sudo mkdir -p /var/www/html/
+            sudo cp /tmp/sites/HamroCRUD/index.html /var/www/html/index.html
+            sudo chown -R www-data:www-data /var/www/html/
+            sudo apt-get install -y nginx
+            sudo systemctl enable nginx
+            sudo systemctl start nginx
+            docker pull rezenn/rijen:latest
+            docker stop hamrocrud 2>/dev/null || true
+            docker rm hamrocrud 2>/dev/null || true
+            docker run -d --name hamrocrud -p 9092:80 rezenn/rijen:latest
+            echo "Done! Visit http://3.210.181.28"

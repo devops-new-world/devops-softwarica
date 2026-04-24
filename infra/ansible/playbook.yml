@@ -3,22 +3,19 @@
   hosts: k8s_master:k8s_workers
   become: yes
   gather_facts: yes
-  
+
   roles:
     - k8s-cluster
 
   vars:
     # Kubernetes version
     k8s_version: "1.33"
-    
+
     # Network configuration
     pod_network_cidr: "192.168.0.0/16"
-    
+
     # CNI provider
     cni_provider: calico
-    
+
     # Optional: Specify private IP for master node (if different from default)
     # k8s_private_ip: "172.31.40.47"
-
-
-

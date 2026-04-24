@@ -13,7 +13,7 @@ all:
           ansible_host: YOUR_MASTER_IP
           ansible_user: ubuntu
           ansible_ssh_private_key_file: ~/.ssh/your-key.pem
-    
+
     k8s_workers:
       hosts:
         worker-node-1:
@@ -60,7 +60,7 @@ k8s_workers:
       ansible_host: WORKER_2_IP
       ansible_user: ubuntu
       ansible_ssh_private_key_file: ~/.ssh/your-key.pem
-    worker-node-3:  # Add as many as you need!
+    worker-node-3: # Add as many as you need!
       ansible_host: WORKER_3_IP
       ansible_user: ubuntu
       ansible_ssh_private_key_file: ~/.ssh/your-key.pem
@@ -90,6 +90,3 @@ ansible-playbook playbook.yml --tags prerequisites
 # Check connectivity
 ansible all -m ping
 ```
-
-
-
