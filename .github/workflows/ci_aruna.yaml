@@ -2,7 +2,7 @@ name: Deploy Aruna's website
  
 on:
   push:
-    branches:
+    tags:
       - "**"
 jobs:
   docker_build_and_push:
