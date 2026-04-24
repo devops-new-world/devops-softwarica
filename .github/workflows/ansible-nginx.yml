@@ -1,17 +1,29 @@
-name: Deploy Nginx Site (Ansible)
+name: Provision Nginx Server Shothai
 
 on:
   workflow_dispatch:
+    inputs:
+      server_ip:
+        description: "Target Server IP Address"
+        required: true
+      ssh_user:
+        description: "SSH User"
+        required: true
+        default: "ubuntu"
+      ssh_password:
+        description: "SSH Password"
+        required: true
 
 jobs:
   deploy:
+    name: Run Ansible Playbook
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Ansible + sshpass
+      - name: Install Ansible
         run: |
           sudo apt update
           sudo apt install -y ansible sshpass
@@ -19,16 +31,10 @@ jobs:
       - name: Create inventory
         run: |
           echo "[web]" > inventory.ini
-          echo "benchvm ansible_host=54.242.136.129 ansible_user=ubuntu ansible_ssh_pass=changeme" >> inventory.ini
+          echo "${{ github.event.inputs.server_ip }} ansible_user=${{ github.event.inputs.ssh_user }} ansible_ssh_pass=${{ github.event.inputs.ssh_password }}" >> inventory.ini
 
-      - name: Disable host key checking
+      - name: Run Playbook
         run: |
-          echo -e "[defaults]\nhost_key_checking = False" > ansible.cfg
-
-      - name: Test connection
-        run: |
-          ansible -i inventory.ini web -m ping
-
-      - name: Run playbook
-        run: |
-          ansible-playbook -i inventory.ini infra/ansible/deploy-site.yml
+          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
+          -i inventory.ini \
+          infra/ansible/deploy-site.yml
