@@ -1,0 +1,90 @@
+name: Deploy VMs with Terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform Action'
+        required: true
+        type: choice
+        options:
+          - 'plan'
+          - 'apply'
+          - 'destroy'
+        default: 'plan'
+      aws_region:
+        description: 'AWS Region'
+        required: true
+        type: string
+        default: 'us-east-1'
+      vm_type:
+        description: 'VM Type (cluster or general)'
+        required: true
+        type: choice
+        options:
+          - 'cluster'
+          - 'general'
+        default: 'cluster'
+
+jobs:
+  terraform:
+    name: Deploy Infrastructure with Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Terraform Init
+        run: |
+          cd infra/terraform
+          terraform init
+
+      - name: Terraform Plan
+        if: ${{ inputs.action == 'plan' || inputs.action == 'apply' }}
+        run: |
+          cd infra/terraform
+          terraform plan \
+            -var="aws_region=${{ inputs.aws_region }}" \
+            -var="vm_type=${{ inputs.vm_type }}" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        if: ${{ inputs.action == 'apply' }}
+        run: |
+          cd infra/terraform
+          terraform apply -auto-approve tfplan
+
+      - name: Terraform Destroy
+        if: ${{ inputs.action == 'destroy' }}
+        run: |
+          cd infra/terraform
+          terraform destroy \
+            -var="aws_region=${{ inputs.aws_region }}" \
+            -var="vm_type=${{ inputs.vm_type }}" \
+            -auto-approve
+
+      - name: Output Infrastructure Details
+        if: ${{ inputs.action == 'apply' }}
+        run: |
+          cd infra/terraform
+          echo "=== Infrastructure Deployed ==="
+          terraform output
+
+      - name: Display Terraform Plan
+        if: ${{ inputs.action == 'plan' }}
+        run: |
+          echo "=== Terraform Plan Generated ==="
+          echo "Review the plan above and run 'apply' action to deploy"
