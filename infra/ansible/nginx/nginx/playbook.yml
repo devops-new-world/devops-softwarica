@@ -4,16 +4,10 @@
   become: yes
 
   vars:
-    nginx_backends: []
-    # Example backend configuration:
-    #  - path: "/app1"
-    #    proxy_pass: "http://127.0.0.1:8081"
-
-    # Define other standalone virtual hosts
-    nginx_vhosts:
-      - server_name: "example.com"
-        port: 80
-        root: "/var/www/example"
+    # The React landing page now lives inside the frontend Docker image.
+    # Host nginx only reverse-proxies traffic to the frontend container.
+    frontend_proxy_pass: "http://127.0.0.1:8080"
+    nginx_vhosts: []
 
   tasks:
     - name: Install Nginx

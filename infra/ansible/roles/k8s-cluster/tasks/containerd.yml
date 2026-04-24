@@ -13,14 +13,14 @@
   file:
     path: /etc/apt/keyrings
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: yes
 
 - name: Add Docker's official GPG key
   get_url:
     url: https://download.docker.com/linux/ubuntu/gpg
     dest: /etc/apt/keyrings/docker.asc
-    mode: '0644'
+    mode: "0644"
   become: yes
 
 - name: Get OS codename
@@ -70,7 +70,7 @@
   lineinfile:
     path: "{{ containerd_config_path }}"
     regexp: '^\s*SystemdCgroup\s*='
-    line: '            SystemdCgroup = true'
+    line: "            SystemdCgroup = true"
     insertafter: '\[plugins\."io\.containerd\.grpc\.v1\.cri"\.containerd\.runtimes\.runc\.options\]'
   become: yes
   notify: restart containerd
@@ -88,6 +88,3 @@
   changed_when: false
   register: crictl_info
   failed_when: false
-
-
-

@@ -1,0 +1,40 @@
+services:
+  backend:
+    image: ${DOCKERHUB_USERNAME:-local}/bench-natak-backend:${IMAGE_TAG:-latest}
+    build:
+      context: ./sites/natak-backend
+      dockerfile: Dockerfile
+    container_name: natak-backend
+    environment:
+      PORT: 5000
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:5000/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    image: ${DOCKERHUB_USERNAME:-local}/bench-natak-frontend:${IMAGE_TAG:-latest}
+    build:
+      context: ./sites/natak
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    container_name: natak-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    restart: unless-stopped

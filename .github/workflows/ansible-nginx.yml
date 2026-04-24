@@ -79,4 +79,3 @@ jobs:
           echo "${{ inputs.server_ip }} ansible_user=${{ inputs.ssh_user }}" > inventory.ini
           ansible all -i inventory.ini -m ping
           ansible-playbook -i inventory.ini playbook.yml
-
