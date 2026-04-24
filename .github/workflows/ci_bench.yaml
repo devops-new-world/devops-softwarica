@@ -1,10 +1,27 @@
-name: Docker build & deploy
+name: Deploy to Remote Server
 
 on:
-  push:
-    branches:
-      - "bench_01"
+  # push:
+  #   branches:
+  #     - bench_01
+  workflow_dispatch:
+
 jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        
+      - name: Copy files via SCP
+        uses: appleboy/scp-action@v1
+        with:
+          host: eef1df54591c.mylabserver.com
+          username: ${{ secrets.BENCH_01}}
+          key: ${{ secrets.SUJAL_SSH }}
+          source: "./*"
+          target: /home/sujal/
+
   docker-build-and-push:
     runs-on: ubuntu-latest
     steps:
@@ -20,22 +37,3 @@ jobs:
         run: |
           docker build -f sites/pravesh/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/pravesh:latest sites/pravesh
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/pravesh:latest
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: docker-build-and-push
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: copy files via SSH
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.HOST }}
-          username: pravesh
-          key: ${{ secrets.BENCH_01 }}
-          port: 22
-          source: "sites/bench_01/index.html"
-          strip_components: 2
-          target: "/var/www/html/bench_01/"
-          overwrite: true
