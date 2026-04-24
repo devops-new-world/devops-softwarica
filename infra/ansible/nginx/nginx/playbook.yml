@@ -4,10 +4,19 @@
   become: yes
 
   vars:
+<<<<<<< HEAD
+    nginx_backends: []
+
+    nginx_vhosts:
+      - server_name: "example.com"
+        port: 80
+        root: "/var/www/example"
+=======
     # The React landing page now lives inside the frontend Docker image.
     # Host nginx only reverse-proxies traffic to the frontend container.
     frontend_proxy_pass: "http://127.0.0.1:8080"
     nginx_vhosts: []
+>>>>>>> main
 
   tasks:
     - name: Install Nginx
@@ -28,10 +37,18 @@
         state: absent
       notify: Reload Nginx
 
+<<<<<<< HEAD
+    # ✅ FIXED TASK (NO RELATIVE PATHS)
+    - name: Deploy default landing page
+      copy:
+        src: public/
+        dest: /var/www/html/
+=======
     - name: Deploy HamroCRUD site
       copy:
         src: "../../../../sites/aruna/"
         dest: "/var/www/html/"
+>>>>>>> main
         owner: www-data
         group: www-data
         mode: "0644"
