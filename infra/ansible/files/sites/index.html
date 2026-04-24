@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bench Shot Hai</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      text-align: center;
+    }
+
+    header {
+      padding: 40px;
+      font-size: 34px;
+      font-weight: bold;
+      background: rgba(30, 58, 138, 0.8);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      animation: slideDown 1s ease;
+    }
+
+    .subtitle {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #cbd5f5;
+    }
+
+    .team {
+      margin-top: 50px;
+    }
+
+    .card {
+      display: inline-block;
+      margin: 20px;
+      padding: 25px;
+      width: 220px;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      transition: 0.3s;
+      cursor: pointer;
+      animation: fadeIn 1.5s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.05);
+      background: rgba(255,255,255,0.2);
+      box-shadow: 0 0 20px rgba(59,130,246,0.6);
+    }
+
+    .role {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    /* GAME SECTION */
+    #game {
+      margin-top: 70px;
+    }
+
+    #target {
+      width: 60px;
+      height: 60px;
+      background: #3b82f6;
+      border-radius: 50%;
+      position: relative;
+      margin: 30px auto;
+      cursor: pointer;
+      display: none;
+      transition: transform 0.2s;
+    }
+
+    #target:hover {
+      background: #60a5fa;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    footer {
+      margin-top: 60px;
+      padding: 20px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes slideDown {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  🚀 Bench Shot Hai Team
+  <div class="subtitle">DevOps CI/CD Project Deployment</div>
+</header>
+
+<div class="team">
+
+  <div class="card" onclick="showRole(this, 'Team Lead & DevOps Engineer')">
+    <h3>Abhishek</h3>
+    <div class="role">Click to see role</div>
+  </div>
+
+  <div class="card" onclick="showRole(this, 'Backend & Docker Specialist')">
+    <h3>Bhusan</h3>
+    <div class="role">Click to see role</div>
+  </div>
+
+  <div class="card" onclick="showRole(this, 'CI/CD Pipeline Engineer')">
+    <h3>Sanket</h3>
+    <div class="role">Click to see role</div>
+  </div>
+
+  <div class="card" onclick="showRole(this, 'Cloud & Infrastructure (AWS/Terraform)')">
+    <h3>Aaayush</h3>
+    <div class="role">Click to see role</div>
+  </div>
+
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <h2>🎯 Mini Game: Click the Target!</h2>
+  <p>Score: <span id="score">0</span> | Time: <span id="time">10</span>s</p>
+  <div id="target"></div>
+  <button onclick="startGame()">Start Game</button>
+</div>
+
+<footer>
+  Softwarica College | DevOps Project 🚀  
+  <br>
+  Built with Docker • Ansible • Terraform • GitHub Actions
+</footer>
+
+<script>
+  // TEAM ROLE FUNCTION
+  function showRole(card, roleText) {
+    const roleDiv = card.querySelector(".role");
+    roleDiv.innerText = roleText;
+  }
+
+  // GAME LOGIC
+  let score = 0;
+  let timeLeft = 10;
+  let gameInterval;
+
+  function startGame() {
+    score = 0;
+    timeLeft = 10;
+    document.getElementById("score").innerText = score;
+    document.getElementById("time").innerText = timeLeft;
+
+    const target = document.getElementById("target");
+    target.style.display = "block";
+
+    moveTarget();
+
+    gameInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById("time").innerText = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(gameInterval);
+        target.style.display = "none";
+        alert("Game Over! Score: " + score);
+      }
+    }, 1000);
+  }
+
+  function moveTarget() {
+    const target = document.getElementById("target");
+
+    target.onclick = () => {
+      score++;
+      document.getElementById("score").innerText = score;
+
+      const x = Math.random() * 300 - 150;
+      const y = Math.random() * 200 - 100;
+
+      target.style.transform = `translate(${x}px, ${y}px)`;
+    };
+  }
+</script>
+
+</body>
+</html>
