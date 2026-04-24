@@ -72,7 +72,7 @@ jobs:
 
       - name: Run Ansible (Key Auth)
         if: ${{ inputs.auth_method == 'key' }}
-        working-directory: ./infra/ansible/nginx
+        working-directory: ./infra/ansible/nginx/nginx
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |

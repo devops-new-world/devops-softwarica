@@ -30,8 +30,8 @@
 
     - name: Deploy HamroCRUD site
       copy:
-        src: "../../../../sites/bench-sanin/index.html"
-        dest: "/var/www/html/index.html"
+        src: "../../../../sites/aruna/"
+        dest: "/var/www/html/"
         owner: www-data
         group: www-data
         mode: "0644"

@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: taskdb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - '5432:5432'
+
+  server:
+    build: ./server
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/taskdb
+      PORT: 4000
+    ports:
+      - '4000:4000'
+
+  client:
+    build: ./client
+    depends_on:
+      - server
+    ports:
+      - '5173:80'
+
+volumes:
+  db_data:
