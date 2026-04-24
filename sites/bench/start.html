@@ -6,12 +6,60 @@
   <title>Bench 01 | DevOps Landing Page</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0px); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateY(-20px); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3), 0 0 40px rgba(37, 99, 235, 0.1); }
+      50% { box-shadow: 0 0 30px rgba(37, 99, 235, 0.5), 0 0 60px rgba(37, 99, 235, 0.2); }
+    }
+
+    @keyframes slideInLeft {
+      0% { transform: translateX(-100px); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideInRight {
+      0% { transform: translateX(100px); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes rotateGradient {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
     html {
@@ -21,9 +69,12 @@
     body {
       font-family: 'Inter', sans-serif;
       color: #1a1a1a;
-      background: linear-gradient(135deg, #f5f5f5 0%, #e9e9e9 100%);
+      background: linear-gradient(-45deg, #0f172a, #1e3a8a, #1e40af, #2563eb);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
       min-height: 100vh;
       line-height: 1.6;
+      overflow-x: hidden;
     }
 
     .container {
@@ -34,11 +85,18 @@
 
     /* Navigation */
     nav {
-      background: white;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
       position: sticky;
       top: 0;
       z-index: 100;
+      animation: slideInDown 0.8s ease;
+    }
+
+    @keyframes slideInDown {
+      0% { transform: translateY(-100px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
     }
 
     .nav-content {
@@ -49,210 +107,391 @@
     }
 
     .logo {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #2563eb;
+      font-family: 'Poppins', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #2563eb, #0f766e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       text-decoration: none;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
     }
 
     .logo-icon {
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       background: linear-gradient(135deg, #2563eb, #1e40af);
-      border-radius: 8px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-weight: bold;
+      font-weight: 800;
+      font-size: 1.5rem;
+      animation: bounceIn 0.8s ease;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
     }
 
     .nav-links {
       display: flex;
-      gap: 2rem;
+      gap: 2.5rem;
       list-style: none;
     }
 
     .nav-links a {
       color: #666;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
+      position: relative;
       transition: color 0.3s ease;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #2563eb, #0f766e);
+      transition: width 0.3s ease;
     }
 
     .nav-links a:hover {
       color: #2563eb;
     }
 
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
     /* Hero Section */
     .hero {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 3rem;
+      gap: 4rem;
       align-items: center;
-      padding: 6rem 0;
+      padding: 6rem 0 4rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      animation: slideInLeft 1s ease;
     }
 
     .hero-content h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 3.5rem;
-      line-height: 1.2;
+      font-family: 'Poppins', sans-serif;
+      font-size: 4.5rem;
+      line-height: 1.1;
       margin-bottom: 1.5rem;
-      color: #1a1a1a;
+      color: white;
+      font-weight: 800;
+      animation: floatUp 1.2s ease;
+    }
+
+    .hero-content h1 span {
+      background: linear-gradient(135deg, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: pulse 2s ease-in-out infinite;
     }
 
     .hero-content p {
-      font-size: 1.1rem;
-      color: #666;
-      margin-bottom: 2rem;
+      font-size: 1.15rem;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 2.5rem;
       line-height: 1.8;
+      animation: slideInLeft 1.2s ease;
     }
 
     .cta-buttons {
       display: flex;
-      gap: 1rem;
+      gap: 1.5rem;
       flex-wrap: wrap;
+      animation: slideInLeft 1.4s ease;
     }
 
     .btn {
-      padding: 12px 28px;
-      border-radius: 8px;
+      padding: 14px 32px;
+      border-radius: 12px;
       text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      font-weight: 700;
+      transition: all 0.4s ease;
       border: none;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 1.05rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn:hover::before {
+      left: 100%;
     }
 
     .btn-primary {
       background: linear-gradient(135deg, #2563eb, #1e40af);
       color: white;
-      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(37, 99, 235, 0.6);
     }
 
     .btn-secondary {
-      background: white;
-      color: #2563eb;
-      border: 2px solid #2563eb;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(10px);
     }
 
     .btn-secondary:hover {
-      background: #f0f4ff;
-      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: translateY(-3px);
     }
 
     .hero-visual {
-      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-      border-radius: 16px;
-      padding: 2rem;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(15, 118, 110, 0.15) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 3rem;
       color: white;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 400px;
-      box-shadow: 0 20px 40px rgba(37, 99, 235, 0.2);
+      min-height: 450px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+      animation: slideInRight 1.2s ease;
+      overflow: hidden;
+    }
+
+    .hero-visual::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(52, 211, 153, 0.1) 0%, transparent 70%);
+      animation: rotateGradient 20s linear infinite;
     }
 
     .hero-visual h2 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
+      font-family: 'Poppins', sans-serif;
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
     }
+
+    .hero-visual ul {
+      list-style: none;
+      font-size: 1.1rem;
+      position: relative;
+      z-index: 1;
+      line-height: 2;
+    }
+
+    .hero-visual li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: floatUp 1.5s ease backwards;
+    }
+
+    .hero-visual li:nth-child(1) { animation-delay: 0.1s; }
+    .hero-visual li:nth-child(2) { animation-delay: 0.2s; }
+    .hero-visual li:nth-child(3) { animation-delay: 0.3s; }
+    .hero-visual li:nth-child(4) { animation-delay: 0.4s; }
+    .hero-visual li:nth-child(5) { animation-delay: 0.5s; }
 
     .feature-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-      padding: 4rem 0;
+      gap: 2.5rem;
+      padding: 6rem 0;
     }
 
     .feature-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      transition: all 0.5s ease;
+      position: relative;
+      overflow: hidden;
+      animation: bounceIn 0.8s ease backwards;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .feature-card:hover::before {
+      left: 100%;
     }
 
     .feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      transform: translateY(-12px);
+      box-shadow: 0 20px 60px rgba(37, 99, 235, 0.2);
+      border-top: 3px solid #2563eb;
     }
 
     .feature-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
+      display: inline-block;
+      animation: pulse 2s ease-in-out infinite;
     }
 
     .feature-card h3 {
-      font-size: 1.3rem;
-      margin-bottom: 0.5rem;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.4rem;
+      margin-bottom: 0.8rem;
       color: #1a1a1a;
+      font-weight: 700;
     }
 
     .feature-card p {
       color: #666;
       font-size: 0.95rem;
+      line-height: 1.7;
     }
 
-    /* Section */
+    /* Sections */
     section {
-      padding: 4rem 0;
+      padding: 5rem 0;
+      position: relative;
+    }
+
+    section.light {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.95) 100%);
     }
 
     section h2 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 2.5rem;
+      font-family: 'Poppins', sans-serif;
+      font-size: 3rem;
       margin-bottom: 1rem;
+      color: #1a1a1a;
+      font-weight: 800;
+      animation: slideInLeft 0.8s ease;
+    }
+
+    section.light h2 {
       color: #1a1a1a;
     }
 
     .section-subtitle {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       color: #666;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
+      animation: slideInLeft 1s ease;
     }
 
     /* Footer */
     footer {
-      background: #1a1a1a;
+      background: rgba(26, 26, 26, 0.98);
+      backdrop-filter: blur(20px);
       color: white;
       text-align: center;
-      padding: 2rem 0;
-      margin-top: 4rem;
+      padding: 3rem 0;
+      margin-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     footer p {
-      margin: 0.5rem 0;
+      margin: 0.8rem 0;
       color: #aaa;
+      animation: floatUp 1.5s ease;
+    }
+
+    footer strong {
+      background: linear-gradient(135deg, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     /* Responsive */
     @media (max-width: 768px) {
       .hero {
         grid-template-columns: 1fr;
-        padding: 3rem 0;
+        padding: 3rem 0 2rem 0;
       }
 
       .hero-content h1 {
-        font-size: 2.5rem;
+        font-size: 2.8rem;
+      }
+
+      .hero-visual {
+        min-height: 350px;
       }
 
       .feature-grid {
         grid-template-columns: 1fr;
+        gap: 2rem;
       }
 
       .nav-links {
         gap: 1rem;
+        font-size: 0.9rem;
       }
 
       .cta-buttons {
@@ -263,6 +502,10 @@
         width: 100%;
         text-align: center;
       }
+
+      section h2 {
+        font-size: 2.2rem;
+      }
     }
   </style>
 </head>
@@ -272,62 +515,62 @@
     <div class="container">
       <div class="nav-content">
         <a href="#" class="logo">
-          <div class="logo-icon">B</div>
+          <div class="logo-icon">⚡</div>
           Bench 01
         </a>
         <ul class="nav-links">
           <li><a href="#features">Features</a></li>
           <li><a href="#deployment">Deployment</a></li>
-          <li><a href="#about">About</a></li>
+          <li><a href="#stack">Stack</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
   <!-- Hero Section -->
-  <section class="hero" style="padding-top: 4rem;">
-    <div class="container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+  <section class="hero">
+    <div class="container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
       <div class="hero-content">
-        <h1>Deploy with Confidence</h1>
-        <p>Bench 01 is your modern DevOps landing page. Built with Terraform infrastructure provisioning and Ansible configuration management, it brings your infrastructure to life with clean deployment workflows.</p>
+        <h1>Deploy with <span>Confidence</span></h1>
+        <p>Bench 01 brings modern DevOps infrastructure to life. Terraform provisions, Ansible configures, and GitHub Actions orchestrates—all in a seamless, automated workflow.</p>
         <div class="cta-buttons">
-          <a href="#features" class="btn btn-primary">Explore Features</a>
-          <a href="#deployment" class="btn btn-secondary">See Deployment</a>
+          <a href="#features" class="btn btn-primary">✨ Explore Features</a>
+          <a href="#deployment" class="btn btn-secondary">📋 See Deployment</a>
         </div>
       </div>
       <div class="hero-visual">
-        <h2>Infrastructure Ready</h2>
-        <p style="font-size: 1.05rem; opacity: 0.9;">
-          ✓ Terraform provisioned VMs<br>
-          ✓ Ansible automated deployment<br>
-          ✓ Nginx web server<br>
-          ✓ GitHub Actions CI/CD<br>
-          ✓ Production ready
-        </p>
+        <h2>🚀 Ready to Deploy</h2>
+        <ul>
+          <li>✓ Terraform Infrastructure as Code</li>
+          <li>✓ Ansible Automation</li>
+          <li>✓ Nginx Web Server</li>
+          <li>✓ GitHub Actions CI/CD</li>
+          <li>✓ Production Ready</li>
+        </ul>
       </div>
     </div>
   </section>
 
   <!-- Features Section -->
-  <section id="features">
+  <section id="features" class="light">
     <div class="container">
       <h2>Why Bench 01?</h2>
-      <p class="section-subtitle">Modern infrastructure deployment made simple and reliable</p>
+      <p class="section-subtitle">Modern infrastructure deployment made simple, scalable, and reliable</p>
       <div class="feature-grid">
         <div class="feature-card">
           <div class="feature-icon">🏗️</div>
           <h3>Infrastructure as Code</h3>
-          <p>Terraform-based infrastructure that's version-controlled, repeatable, and auditable. Define your AWS resources once, deploy everywhere.</p>
+          <p>Terraform-based infrastructure that's version-controlled, repeatable, and auditable. Define your AWS resources once, deploy everywhere with confidence.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">⚙️</div>
           <h3>Configuration Management</h3>
-          <p>Ansible playbooks automate Nginx setup and application deployment. No manual SSH sessions, just idempotent automation.</p>
+          <p>Ansible playbooks automate Nginx setup and application deployment. No manual SSH sessions—just idempotent, declarative automation that ensures consistency.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🚀</div>
           <h3>CI/CD Integration</h3>
-          <p>GitHub Actions workflows trigger automatic deployments. Push to bench_01 branch and watch your infrastructure update in real-time.</p>
+          <p>GitHub Actions workflows trigger automatic deployments on every push. Watch your infrastructure update in real-time without lifting a finger.</p>
         </div>
       </div>
     </div>
@@ -337,48 +580,48 @@
   <section id="deployment">
     <div class="container">
       <h2>Deploy in 3 Steps</h2>
-      <p class="section-subtitle">From code to production in minutes</p>
+      <p class="section-subtitle">From code to production—fast, reliable, and automated</p>
       <div class="feature-grid">
         <div class="feature-card">
           <div class="feature-icon">1️⃣</div>
           <h3>Provision Infrastructure</h3>
-          <p>Run Terraform workflow on GitHub Actions. Specify AWS credentials, region, and instance count. EC2 instances launch automatically.</p>
+          <p>Terraform powers up your AWS EC2 instances automatically. Define your infrastructure once, scale it effortlessly. All tracked in version control.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">2️⃣</div>
           <h3>Configure with Ansible</h3>
-          <p>Trigger Ansible playbook with server IP. Nginx installs, SSL configures, and your site deploys. All automated and idempotent.</p>
+          <p>Ansible playbooks handle all configuration. Nginx installs, services start, and your application deploys—all consistent, all idempotent, all automated.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">3️⃣</div>
           <h3>Access Your Site</h3>
-          <p>Visit your server's public IP in any browser. Your application is live, monitored, and ready for production traffic.</p>
+          <p>Your site is live and ready. Visit your server's public IP in any browser. Monitoring, logging, and performance—all production-ready out of the box.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- About Section -->
-  <section id="about">
+  <!-- Stack Section -->
+  <section id="stack" class="light">
     <div class="container">
       <h2>The Bench 01 Stack</h2>
-      <p class="section-subtitle">Production-grade technologies for reliable deployments</p>
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+      <p class="section-subtitle">Enterprise-grade technologies for reliable, scalable deployments</p>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5rem;">
         <div class="feature-card">
-          <h3>Frontend</h3>
-          <p><strong>Nginx:</strong> High-performance reverse proxy and web server. Handles static assets, SSL termination, and load balancing with minimal resource overhead.</p>
+          <h3>🌐 Frontend Layer</h3>
+          <p><strong>Nginx:</strong> High-performance reverse proxy and web server. Handles static assets, SSL termination, and load balancing with minimal resource overhead. Production-tested.</p>
         </div>
         <div class="feature-card">
-          <h3>Infrastructure</h3>
-          <p><strong>Terraform:</strong> AWS EC2 instances, security groups, and networking. Infrastructure versioning, state management, and disaster recovery built-in.</p>
+          <h3>☁️ Infrastructure Layer</h3>
+          <p><strong>Terraform on AWS:</strong> EC2 instances, security groups, VPCs, and networking. Infrastructure versioning, state management, and disaster recovery all built-in.</p>
         </div>
         <div class="feature-card">
-          <h3>Orchestration</h3>
-          <p><strong>Ansible:</strong> Agentless configuration management. Playbooks define desired state; Ansible ensures compliance without system agents.</p>
+          <h3>🔧 Orchestration Layer</h3>
+          <p><strong>Ansible:</strong> Agentless configuration management. Playbooks define desired state; Ansible ensures compliance without system agents or complexity.</p>
         </div>
         <div class="feature-card">
-          <h3>Automation</h3>
-          <p><strong>GitHub Actions:</strong> CI/CD workflows triggered on push. Terraform and Ansible runs orchestrated from version control.</p>
+          <h3>⚡ Automation Layer</h3>
+          <p><strong>GitHub Actions:</strong> CI/CD workflows triggered on push. Terraform and Ansible runs orchestrated from version control with full history and auditability.</p>
         </div>
       </div>
     </div>
@@ -387,10 +630,40 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p><strong>Bench 01</strong> &mdash; Modern DevOps Landing Page</p>
-      <p>Built with Terraform, Ansible, and GitHub Actions</p>
-      <p style="margin-top: 2rem; color: #555;">Production-ready infrastructure automation</p>
+      <p><strong>Bench 01</strong> — Modern DevOps Infrastructure</p>
+      <p>Built with Terraform, Ansible, and GitHub Actions for production-ready deployments</p>
+      <p style="margin-top: 2.5rem; font-size: 0.9rem; opacity: 0.7;">Infrastructure automation that scales with you</p>
     </div>
   </footer>
+
+  <script>
+    // Smooth scroll observer for animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animation = entry.target.getAttribute('data-animation') || 'slideInLeft 0.8s ease';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('section, .feature-card').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Parallax effect on scroll
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const hero = document.querySelector('.hero::before');
+      if (hero) {
+        document.documentElement.style.setProperty('--scroll', scrollY + 'px');
+      }
+    });
+  </script>
 </body>
 </html>
