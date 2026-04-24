@@ -4,10 +4,10 @@
   file:
     path: /etc/apt/keyrings
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Remove all old Kubernetes repo list files
-  ansible.builtin.shell: |
+  shell: |
     rm -f /etc/apt/sources.list.d/*kube*
     rm -f /etc/apt/sources.list.d/*k8s*
     rm -f /etc/apt/sources.list.d/*kubernetes*
@@ -18,7 +18,7 @@
   get_url:
     url: "{{ k8s_repo_url }}Release.key"
     dest: "/tmp/kubernetes-release.key"
-    mode: '0644'
+    mode: "0644"
 
 - name: Convert Release.key to GPG keyring format
   command: >
@@ -44,7 +44,7 @@
   file:
     path: /var/lib/apt/lists
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Clean APT cache
   command: apt-get clean

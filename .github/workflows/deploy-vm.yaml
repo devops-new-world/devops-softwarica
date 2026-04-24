@@ -1,4 +1,4 @@
-name: Deploy VMs with Terraform
+name: bench-villian Deploy VMs with Terraform 
 
 on:
   workflow_dispatch:

@@ -1,5 +1,5 @@
-name: Deploy bench-ro
-
+name: Deploy bench-hamroCRUD
+#
 on:
   workflow_dispatch:
     inputs:

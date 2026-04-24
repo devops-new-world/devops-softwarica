@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ./natak-backend
+      dockerfile: Dockerfile
+    container_name: natak-backend
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./natak
+      dockerfile: Dockerfile
+    container_name: natak-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

@@ -1,0 +1,39 @@
+name: Deploy Aruna's website 
+ 
+on:
+  push:
+    tags:
+      - "**"
+jobs:
+  docker_build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}
+          password: ${{ secrets.DOCKERHUB_TOKEN_ARUNA }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./sites/aruna
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest
+
+  deploy:
+    needs: docker_build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy via SSH with password
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME1 }}@${{ secrets.HOST1 }} "docker pull ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest && docker rm -f aruna-site || true && docker ps -q --filter publish=8080 | xargs -r docker rm -f || true && docker run -d --name aruna-site -p 8080:80 ${{ secrets.DOCKERHUB_USERNAME_ARUNA }}/aruna-site:latest" 

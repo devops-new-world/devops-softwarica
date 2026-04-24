@@ -2,8 +2,14 @@ name: Deploy HamroCRUD website
 
 on:
   push:
-    branches:
-      - "bench-hamro"
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      server_ip:
+        description: "AWS EC2 Instance IP"
+        required: false
+        type: string
 
 jobs:
   docker-build-and-push:
@@ -33,24 +39,30 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          printf "%s" "${{ secrets.RIJEN_SECRET }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -4 -T 10 eef1df54591c.mylabserver.com >> ~/.ssh/known_hosts || true
+      - name: Copy index.html to Server
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ github.event.inputs.server_ip || '3.210.181.28' }}
+          username: ubuntu
+          password: ${{ secrets.EC2_PASSWORD }}
+          source: "sites/HamroCRUD/index.html"
+          target: /tmp/
 
-      - name: Test SSH Connection
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-          rijen@eef1df54591c.mylabserver.com "echo SSH OK"
-
-      - name: Deploy Docker Container on Server
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-          rijen@eef1df54591c.mylabserver.com "
-            docker pull rezenn/rijen:latest &&
-            docker stop hamrocrud 2>/dev/null || true &&
-            docker rm hamrocrud 2>/dev/null || true &&
+      - name: Deploy on Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ github.event.inputs.server_ip || '3.210.181.28' }}
+          username: ubuntu
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            sudo mkdir -p /var/www/html/
+            sudo cp /tmp/sites/HamroCRUD/index.html /var/www/html/index.html
+            sudo chown -R www-data:www-data /var/www/html/
+            sudo apt-get install -y nginx
+            sudo systemctl enable nginx
+            sudo systemctl start nginx
+            docker pull rezenn/rijen:latest
+            docker stop hamrocrud 2>/dev/null || true
+            docker rm hamrocrud 2>/dev/null || true
             docker run -d --name hamrocrud -p 9092:80 rezenn/rijen:latest
-          "
+            echo "Done! Visit http://3.210.181.28"

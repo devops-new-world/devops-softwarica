@@ -48,7 +48,7 @@
 - name: Enable IP forwarding immediately
   sysctl:
     name: net.ipv4.ip_forward
-    value: '1'
+    value: "1"
     state: present
     sysctl_set: yes
     reload: yes
@@ -60,6 +60,3 @@
     update_cache: yes
     cache_valid_time: 3600
   become: yes
-
-
-
