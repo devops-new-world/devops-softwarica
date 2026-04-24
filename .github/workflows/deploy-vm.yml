@@ -1,4 +1,4 @@
-name: Deploy VMs with Terraform
+name: Deploy VMs with Terraform bench-random
 
 on:
   workflow_dispatch:
