@@ -2,8 +2,8 @@
 - name: Setup Nginx Server
   hosts: all
   become: yes
+
   vars:
-    # Define backends for the default server
     nginx_backends: []
     # Example backend configuration:
     #  - path: "/app1"
@@ -34,6 +34,7 @@
         state: absent
       notify: Reload Nginx
 
+    # ✅ FIXED TASK (NO RELATIVE PATHS)
     - name: Deploy default landing page
       copy:
         src: "../../../../sites/bench-sanin/index.html"
@@ -44,7 +45,7 @@
 
     - name: Configure default server with proxy backends
       template:
-        src: templates/default.conf.j2
+        src: default.conf.j2
         dest: /etc/nginx/sites-available/default.conf
       notify: Reload Nginx
 
@@ -57,7 +58,7 @@
 
     - name: Configure other virtual hosts
       template:
-        src: templates/vhost.conf.j2
+        src: vhost.conf.j2
         dest: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
       loop: "{{ nginx_vhosts | default([]) }}"
       notify: Reload Nginx
