@@ -26,6 +26,7 @@ This Ansible role automates the deployment of a Kubernetes cluster using `kubead
 Edit `inventory.yml` or `inventory.ini` to include your nodes:
 
 **YAML format (inventory.yml):**
+
 ```yaml
 all:
   children:
@@ -35,7 +36,7 @@ all:
           ansible_host: YOUR_MASTER_IP
           ansible_user: ubuntu
           ansible_ssh_private_key_file: ~/.ssh/your-key.pem
-    
+
     k8s_workers:
       hosts:
         worker-node-1:
@@ -50,6 +51,7 @@ all:
 ```
 
 **INI format (inventory.ini):**
+
 ```ini
 [k8s_master]
 master-node ansible_host=YOUR_MASTER_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/your-key.pem
@@ -82,13 +84,13 @@ You can customize the deployment by modifying variables in `playbook.yml` or `ro
 
 ### Key Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `k8s_version` | `1.30` | Kubernetes version to install |
-| `pod_network_cidr` | `192.168.0.0/16` | Pod network CIDR (must match CNI) |
-| `cni_provider` | `calico` | CNI provider (currently supports Calico) |
-| `disable_swap` | `true` | Disable swap on all nodes |
-| `enable_ip_forward` | `true` | Enable IP forwarding |
+| Variable            | Default          | Description                              |
+| ------------------- | ---------------- | ---------------------------------------- |
+| `k8s_version`       | `1.30`           | Kubernetes version to install            |
+| `pod_network_cidr`  | `192.168.0.0/16` | Pod network CIDR (must match CNI)        |
+| `cni_provider`      | `calico`         | CNI provider (currently supports Calico) |
+| `disable_swap`      | `true`           | Disable swap on all nodes                |
+| `enable_ip_forward` | `true`           | Enable IP forwarding                     |
 
 ### Example: Custom Configuration
 
@@ -96,7 +98,7 @@ You can customize the deployment by modifying variables in `playbook.yml` or `ro
 - name: Deploy Kubernetes Cluster
   hosts: k8s_master:k8s_workers
   become: yes
-  
+
   roles:
     - k8s-cluster
 
@@ -111,6 +113,7 @@ You can customize the deployment by modifying variables in `playbook.yml` or `ro
 To add more worker nodes to an existing cluster:
 
 1. **Add the new node to inventory:**
+
    ```yaml
    k8s_workers:
      hosts:
@@ -122,16 +125,19 @@ To add more worker nodes to an existing cluster:
    ```
 
 2. **Run the playbook again:**
+
    ```bash
    ansible-playbook playbook.yml --limit k8s_workers
    ```
 
    Or run only on the new worker:
+
    ```bash
    ansible-playbook playbook.yml --limit worker-node-3
    ```
 
 The role will automatically:
+
 - Install prerequisites
 - Install containerd and Kubernetes tools
 - Join the new worker to the cluster
@@ -167,6 +173,7 @@ ansible/
 ## What the Role Does
 
 ### On All Nodes:
+
 1. Disables swap
 2. Loads required kernel modules (overlay, br_netfilter)
 3. Configures kernel parameters (sysctl)
@@ -174,16 +181,19 @@ ansible/
 5. Installs Kubernetes tools (kubeadm, kubelet, kubectl)
 
 ### On Master Node:
+
 1. Initializes the cluster with `kubeadm init`
 2. Sets up kubeconfig for the user
 3. Waits for master to be ready
 
 ### On Worker Nodes:
+
 1. Gets join command from master
 2. Joins the cluster with `kubeadm join`
 3. Waits for node to be ready
 
 ### On Master Node (after workers join):
+
 1. Installs Calico CNI
 2. Labels worker nodes
 3. Displays cluster status
@@ -191,21 +201,25 @@ ansible/
 ## Troubleshooting
 
 ### Check if nodes are ready:
+
 ```bash
 kubectl get nodes
 ```
 
 ### Check pod status:
+
 ```bash
 kubectl get pods -n kube-system
 ```
 
 ### View logs:
+
 ```bash
 kubectl logs -n kube-system <pod-name>
 ```
 
 ### Re-run specific tasks:
+
 ```bash
 # Only run prerequisites
 ansible-playbook playbook.yml --tags prerequisites
@@ -230,6 +244,3 @@ ansible-playbook playbook.yml --tags worker
 ## License
 
 This role is provided as-is for educational and deployment purposes.
-
-
-

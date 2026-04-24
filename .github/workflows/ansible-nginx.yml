@@ -4,40 +4,53 @@ on:
   workflow_dispatch:
     inputs:
       server_ip:
-        description: 'Target Server IP Address'
+        description: "Target Server IP Address"
         required: true
         type: string
       ssh_user:
-        description: 'SSH User'
+        description: "SSH User"
         required: true
         type: string
-        default: 'ubuntu'
+        default: "ubuntu"
       auth_method:
-        description: 'SSH Authentication Method'
+        description: "SSH Authentication Method"
         required: true
         type: choice
         options:
-          - 'password'
-          - 'key'
-        default: 'password'
+          - "password"
+          - "key"
+        default: "password"
       ssh_password:
-        description: 'SSH Password (only used if auth_method is password)'
+        description: "SSH Password (only used if auth_method is password)"
         required: false
         type: string
-        default: 'changeme'
+        default: "changeme"
 
 jobs:
   provision-nginx:
     name: Run Ansible Playbook
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install sshpass
-        if: ${{ inputs.auth_method == 'password' }}
-        run: sudo apt-get update && sudo apt-get install -y sshpass
+      - name: Install Ansible + sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible sshpass
+
+      - name: Wait for SSH to be ready
+        run: |
+          echo "Waiting for SSH to become available..."
+          for i in $(seq 1 20); do
+            if nc -zw5 ${{ inputs.server_ip }} 22; then
+              echo "SSH is up!"
+              break
+            fi
+            echo "Attempt $i: SSH not ready, waiting 15s..."
+            sleep 15
+          done
 
       - name: Setup SSH Key
         if: ${{ inputs.auth_method == 'key' }}
@@ -57,7 +70,7 @@ jobs:
           ansible all -i inventory.ini -m ping
           ansible-playbook -i inventory.ini playbook.yml
 
-      - name: Run Ansible Playbook (Key Auth)
+      - name: Run Ansible (Key Auth)
         if: ${{ inputs.auth_method == 'key' }}
         working-directory: ./infra/ansible/nginx/nginx
         env:

@@ -92,7 +92,7 @@
   become: yes
 
 - name: Check containerd status (master)
-  ansible.builtin.command: systemctl status containerd
+  command: systemctl status containerd
   register: containerd_status
   changed_when: false
   become: yes
@@ -124,7 +124,7 @@
     state: directory
     owner: "{{ k8s_user }}"
     group: "{{ k8s_user }}"
-    mode: '0755'
+    mode: "0755"
   become: yes
   when: k8s_user != 'root'
 
@@ -134,7 +134,7 @@
     dest: "{{ k8s_user_home }}/.kube/config"
     owner: "{{ k8s_user }}"
     group: "{{ k8s_user }}"
-    mode: '0644'
+    mode: "0644"
     remote_src: yes
   become: yes
   when: k8s_user != 'root'
@@ -142,8 +142,8 @@
 - name: Set KUBECONFIG environment variable for ubuntu user
   lineinfile:
     path: "{{ k8s_user_home }}/.bashrc"
-    line: 'export KUBECONFIG={{ k8s_user_home }}/.kube/config'
-    regexp: '^export KUBECONFIG='
+    line: "export KUBECONFIG={{ k8s_user_home }}/.kube/config"
+    regexp: "^export KUBECONFIG="
   become: yes
   when: k8s_user != 'root'
 
@@ -157,6 +157,3 @@
   environment:
     KUBECONFIG: "{{ k8s_user_home }}/.kube/config"
   when: not k8s_admin_conf.stat.exists
-
-
-
