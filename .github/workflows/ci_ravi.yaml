@@ -19,7 +19,7 @@ jobs:
           host: ${{ github.event.inputs.server_ip || '3.237.27.18' }}
           username: ubuntu
           password: ${{ secrets.EC2_PASSWORD }}
-          source: "sites/bench/index.html"
+          source: "sites/ravijaiswal/index.html"
           target: /tmp/
           
       - name: Install Nginx and Deploy Site
