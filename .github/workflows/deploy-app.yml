@@ -1,0 +1,44 @@
+name: Deploy Bench 01 to AWS
+
+on:
+  push:
+    branches:
+      - 'bench_first'
+  workflow_dispatch:
+    inputs:
+      server_ip:
+        description: 'AWS EC2 Instance IP (get from Terraform output)'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        
+      - name: Deploy files to AWS EC2
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ github.event.inputs.server_ip || '3.237.27.18' }}
+          username: ubuntu
+          password: ${{ secrets.EC2_PASSWORD }}
+          source: "sites/bench/index.html"
+          target: /tmp/
+          
+      - name: Install Nginx and Deploy Site
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ github.event.inputs.server_ip || '3.237.27.18' }}
+          username: ubuntu
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            sudo apt-get update -y
+            sudo apt-get install -y nginx
+            sudo mkdir -p /var/www/html/
+            sudo cp /tmp/sites/bench/index.html /var/www/html/index.html
+            sudo chown -R www-data:www-data /var/www/html/
+            sudo systemctl enable nginx
+            sudo systemctl start nginx
+            echo "✅ Nginx deployed! Visit: http://${{ github.event.inputs.server_ip || '3.237.27.18' }}"
