@@ -1,9 +1,8 @@
 name: Deploy My website
 
 on:
-  push:
-    branches:
-    - feature/bench-villian
+  tags:
+    - 'v*.*.*'
 jobs:
     deploy:
         runs-on: ubuntu-latest
