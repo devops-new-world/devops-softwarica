@@ -1,4 +1,4 @@
-name: Provision Nginx Server Hamro
+name: Provision Nginx bench-natak Server
 
 on:
   workflow_dispatch:

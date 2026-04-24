@@ -1,6 +1,7 @@
 # Kubernetes Cluster Terraform Configuration
 
 This Terraform configuration creates a Kubernetes cluster infrastructure on AWS with:
+
 - 1 Master node
 - Configurable number of worker nodes (default: 2)
 - Security group with configurable ports (SSH, 6443, 443, 80)
@@ -14,6 +15,7 @@ This Terraform configuration creates a Kubernetes cluster infrastructure on AWS 
 ## Usage
 
 1. **Copy the example variables file:**
+
    ```bash
    cp terraform.tfvars.example terraform.tfvars
    ```
@@ -26,16 +28,19 @@ This Terraform configuration creates a Kubernetes cluster infrastructure on AWS 
    - Modify security group CIDR blocks for better security
 
 3. **Initialize Terraform:**
+
    ```bash
    terraform init
    ```
 
 4. **Review the plan:**
+
    ```bash
    terraform plan
    ```
 
 5. **Apply the configuration:**
+
    ```bash
    terraform apply
    ```
@@ -50,11 +55,13 @@ This Terraform configuration creates a Kubernetes cluster infrastructure on AWS 
 The Terraform configuration automatically creates an AWS Key Pair from your SSH public key. You can provide the public key in two ways:
 
 **Option 1: From a file (recommended)**
+
 ```hcl
 public_key_file = "~/.ssh/id_rsa.pub"
 ```
 
 **Option 2: Inline**
+
 ```hcl
 public_key_inline = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC..."
 ```
@@ -74,12 +81,14 @@ public_key_inline = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC..."
 ## Security Notes
 
 ⚠️ **Important**: The default CIDR blocks (`0.0.0.0/0`) allow access from anywhere. For production use, restrict these to:
+
 - Your IP address for SSH: `["YOUR_IP/32"]`
 - Your VPC CIDR for internal ports: `["10.0.0.0/16"]`
 
 ## Finding Ubuntu AMI ID
 
 To find the Ubuntu 22.04 LTS AMI ID for your region:
+
 ```bash
 aws ec2 describe-images \
   --owners 099720109477 \
@@ -91,4 +100,3 @@ aws ec2 describe-images \
 ```
 
 Replace `us-east-1` with your desired region.
-

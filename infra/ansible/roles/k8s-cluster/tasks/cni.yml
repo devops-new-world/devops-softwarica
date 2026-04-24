@@ -55,7 +55,7 @@
     label: "{{ item }}"
   vars:
     label_item: "{{ worker_node_labels[0] }}"
-  when: 
+  when:
     - worker_nodes_list.stdout_lines | length > 0
     - worker_node_labels | length > 0
     - "'master' not in item | lower and 'control-plane' not in item | lower"
@@ -72,4 +72,3 @@
 - name: Show cluster status
   debug:
     msg: "{{ cluster_status.stdout_lines }}"
-

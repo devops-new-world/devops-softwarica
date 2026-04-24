@@ -26,4 +26,3 @@ worker_join_timeout: 300
 
 worker_node_labels:
   - "node-role.kubernetes.io/worker=worker"
-
