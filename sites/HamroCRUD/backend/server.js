@@ -40,5 +40,4 @@ app.delete("/items/:id", async (req, res) => {
   res.json({ message: "Deleted" });
 });
 
-
 app.listen(5000, () => console.log("Backend running on port 5000"));
