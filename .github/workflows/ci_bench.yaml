@@ -2,8 +2,8 @@ name: Deploy Bench 01 to AWS
 
 on:
   push:
-    branches:
-      - bench_01
+    tags:
+      - '*'
   workflow_dispatch:
     inputs:
       server_ip:
