@@ -34,8 +34,7 @@
         state: absent
       notify: Reload Nginx
 
-    # ✅ FIXED TASK (NO RELATIVE PATHS)
-    - name: Deploy default landing page
+    - name: Deploy HamroCRUD site
       copy:
         src: "../../../../sites/bench-sanin/index.html"
         dest: "/var/www/html/index.html"
