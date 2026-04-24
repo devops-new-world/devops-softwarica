@@ -6,7 +6,7 @@
   vars:
     # The React landing page now lives inside the frontend Docker image.
     # Host nginx only reverse-proxies traffic to the frontend container.
-    frontend_proxy_pass: "http://127.0.0.1:80"
+    frontend_proxy_pass: "http://127.0.0.1:8080"
     nginx_vhosts: []
 
   tasks:
