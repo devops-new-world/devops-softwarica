@@ -1,2 +1,2 @@
-FROM nginx:latest
-COPY sites/HamroCRUD/index.html /usr/share/nginx/html/index.html
+FROM nginx:alpine
+COPY sites /usr/share/nginx/html
