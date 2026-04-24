@@ -36,7 +36,7 @@
 
     - name: Deploy default landing page
       copy:
-        src: "../../../../sites/"
+        src: "../../../../sites/aruna/"
         dest: "/var/www/html/"
         owner: www-data
         group: www-data
