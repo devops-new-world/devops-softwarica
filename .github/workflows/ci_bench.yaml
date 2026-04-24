@@ -23,7 +23,7 @@ jobs:
         with:
           host: ${{ github.event.inputs.server_ip || '34.230.2.91' }}
           username: ubuntu
-          key: ${{ secrets.BENCH_01_KEY }}
+          password: ${{ secrets.EC2_PASSWORD }}
           source: "sites/bench/start.html"
           target: /tmp/
           
@@ -32,7 +32,7 @@ jobs:
         with:
           host: ${{ github.event.inputs.server_ip || '34.230.2.91' }}
           username: ubuntu
-          key: ${{ secrets.SUJAL_SSH }}
+          password: ${{ secrets.EC2_PASSWORD }}
           script: |
             sudo apt-get update -y
             sudo apt-get install -y nginx
