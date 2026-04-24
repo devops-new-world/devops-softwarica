@@ -17,7 +17,7 @@ jobs:
         uses: appleboy/scp-action@v1
         with:
           host: eef1df54591c.mylabserver.com
-          username: ${{ secrets.BENCH_01}}
+          username: ${{ secrets.SUJAL_HOSTS}}
           key: ${{ secrets.SUJAL_SSH }}
           source: "./*"
           target: /home/sujal/

@@ -41,7 +41,7 @@
 
     - name: Configure default server with proxy backends
       template:
-        src: templates/default.conf.j2
+        src: default.conf.j2
         dest: /etc/nginx/sites-available/default.conf
       notify: Reload Nginx
 
@@ -54,7 +54,7 @@
 
     - name: Configure other virtual hosts
       template:
-        src: templates/vhost.conf.j2
+        src: vhost.conf.j2
         dest: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
       loop: "{{ nginx_vhosts | default([]) }}"
       notify: Reload Nginx
