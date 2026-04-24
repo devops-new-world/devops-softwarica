@@ -2,9 +2,8 @@ name: Bench-Sanin CI/CD
 
 on:
   push:
-    branches:
-      - bench-sanin
-
+    tags:
+      - '**'
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
