@@ -38,17 +38,17 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s" "${{ secrets.RIJEN_SECRET }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -4 -T 10 eef1df54591c.mylabserver.com >> ~/.ssh/known_hosts || true
+          ssh-keyscan -4 -T 10 98.92.66.38 >> ~/.ssh/known_hosts || true
 
       - name: Test SSH Connection
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-          rijen@eef1df54591c.mylabserver.com "echo SSH OK"
+          ubuntu@98.92.66.38 "echo SSH OK"
 
       - name: Deploy Docker Container on Server
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa \
-          rijen@eef1df54591c.mylabserver.com "
+          ubuntu@98.92.66.38 "
             docker pull rezenn/rijen:latest &&
             docker stop hamrocrud 2>/dev/null || true &&
             docker rm hamrocrud 2>/dev/null || true &&
