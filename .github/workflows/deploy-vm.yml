@@ -1,4 +1,4 @@
-name: Deploy bench_01
+name: Deploy VMs with Terraform - Bench-Shothai
 
 on:
   workflow_dispatch:
