@@ -1,396 +1,1381 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bench 01 | DevOps Landing Page</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BENCH 01 :: DEVOPS RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --neon-green: #00ff41;
+  --neon-cyan: #00f5ff;
+  --neon-pink: #ff006e;
+  --neon-yellow: #ffe600;
+  --neon-orange: #ff6600;
+  --dark-bg: #020b07;
+  --dark-card: #040f09;
+  --grid-color: rgba(0,255,65,0.07);
+  --scan-speed: 8s;
+}
 
-    html {
-      scroll-behavior: smooth;
-    }
+*{margin:0;padding:0;box-sizing:border-box;}
 
-    body {
-      font-family: 'Inter', sans-serif;
-      color: #1a1a1a;
-      background: linear-gradient(135deg, #f5f5f5 0%, #e9e9e9 100%);
-      min-height: 100vh;
-      line-height: 1.6;
-    }
+/* Custom cursor */
+*{cursor:none !important;}
+#cursor{position:fixed;width:20px;height:20px;pointer-events:none;z-index:99999;transition:transform 0.1s;}
+#cursor::before{content:'';position:absolute;top:50%;left:50%;width:16px;height:16px;border:2px solid var(--neon-green);transform:translate(-50%,-50%) rotate(45deg);animation:cursorPulse 1s ease infinite;}
+#cursor::after{content:'';position:absolute;top:50%;left:50%;width:4px;height:4px;background:var(--neon-green);border-radius:50%;transform:translate(-50%,-50%);}
+@keyframes cursorPulse{0%,100%{opacity:1;border-color:var(--neon-green);}50%{opacity:0.5;border-color:var(--neon-cyan);}}
+#cursor.active::before{transform:translate(-50%,-50%) rotate(45deg) scale(1.5);border-color:var(--neon-pink);}
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
+html{scroll-behavior:smooth;background:var(--dark-bg);}
 
-    /* Navigation */
-    nav {
-      background: white;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+body{
+  font-family:'Share Tech Mono',monospace;
+  background:var(--dark-bg);
+  color:var(--neon-green);
+  overflow-x:hidden;
+  min-height:100vh;
+}
 
-    .nav-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem 0;
-    }
+/* CRT scanline overlay */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);
+  pointer-events:none;z-index:9998;
+}
+/* CRT flicker */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:rgba(0,255,65,0.02);
+  pointer-events:none;z-index:9997;
+  animation:flicker 0.15s infinite;
+}
+@keyframes flicker{0%,100%{opacity:1;}50%{opacity:0.98;}75%{opacity:0.99;}}
 
-    .logo {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #2563eb;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+/* Grid bg */
+.grid-bg{
+  position:fixed;inset:0;
+  background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+  animation:gridScroll 20s linear infinite;
+}
+@keyframes gridScroll{from{background-position:0 0;}to{background-position:0 40px;}}
 
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #2563eb, #1e40af);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-    }
+/* ===== BOOT SCREEN ===== */
+#bootScreen{
+  position:fixed;inset:0;
+  background:#000;z-index:10000;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  font-family:'Press Start 2P',monospace;
+  transition:opacity 0.8s ease;
+}
+#bootScreen.hide{opacity:0;pointer-events:none;}
+.boot-logo{
+  font-size:clamp(1.5rem,4vw,3rem);
+  color:var(--neon-green);
+  text-shadow:0 0 20px var(--neon-green),0 0 40px var(--neon-green);
+  margin-bottom:2rem;
+  animation:bootBlink 0.5s ease infinite alternate;
+}
+@keyframes bootBlink{from{text-shadow:0 0 20px var(--neon-green);}to{text-shadow:0 0 60px var(--neon-green),0 0 80px var(--neon-cyan);}}
+.boot-bar-wrap{width:min(400px,80vw);margin-top:2rem;}
+.boot-bar-label{font-size:0.5rem;color:var(--neon-cyan);margin-bottom:0.5rem;text-align:center;}
+.boot-bar{height:16px;border:2px solid var(--neon-green);position:relative;overflow:hidden;}
+.boot-bar-fill{height:100%;width:0%;background:var(--neon-green);box-shadow:0 0 10px var(--neon-green);transition:width 0.05s linear;}
+.boot-text{margin-top:1.5rem;font-size:0.4rem;color:rgba(0,255,65,0.6);text-align:center;line-height:2;min-height:40px;}
+.press-start{font-size:0.6rem;color:var(--neon-yellow);margin-top:1.5rem;animation:blinkText 1s step-end infinite;}
+@keyframes blinkText{0%,100%{opacity:1;}50%{opacity:0;}}
 
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
+/* ===== XP BAR (sticky top HUD) ===== */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  background:rgba(2,11,7,0.92);
+  border-bottom:1px solid var(--neon-green);
+  backdrop-filter:blur(10px);
+  padding:10px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;flex-wrap:wrap;
+}
+.hud-logo{
+  font-family:'Press Start 2P',monospace;
+  font-size:0.7rem;
+  color:var(--neon-green);
+  text-shadow:0 0 10px var(--neon-green);
+  white-space:nowrap;
+}
+.hud-stats{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;}
+.stat-block{display:flex;flex-direction:column;gap:3px;min-width:80px;}
+.stat-label{font-size:0.35rem;color:rgba(0,255,65,0.6);letter-spacing:1px;}
+.stat-bar{height:8px;background:rgba(0,255,65,0.1);border:1px solid rgba(0,255,65,0.3);overflow:hidden;}
+.stat-fill{height:100%;transition:width 0.5s ease;box-shadow:0 0 6px currentColor;}
+.stat-fill.hp{background:var(--neon-green);color:var(--neon-green);width:100%;}
+.stat-fill.xp{background:var(--neon-yellow);color:var(--neon-yellow);width:0%;}
+.stat-fill.mp{background:var(--neon-cyan);color:var(--neon-cyan);width:70%;}
+.hud-nav{display:flex;gap:1.5rem;list-style:none;}
+.hud-nav a{font-size:0.45rem;color:rgba(0,255,65,0.7);text-decoration:none;font-family:'Press Start 2P',monospace;transition:all 0.2s;padding:4px 8px;border:1px solid transparent;}
+.hud-nav a:hover{color:var(--neon-green);border-color:var(--neon-green);text-shadow:0 0 8px var(--neon-green);}
+.lv-badge{
+  font-family:'Press Start 2P',monospace;font-size:0.55rem;
+  background:var(--neon-yellow);color:#000;
+  padding:4px 8px;white-space:nowrap;
+}
 
-    .nav-links a {
-      color: #666;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
+/* ===== HERO / STAGE 1 ===== */
+.stage-intro{
+  text-align:center;
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(0.5rem,1.5vw,1rem);
+  color:var(--neon-pink);
+  letter-spacing:4px;
+  padding:2rem 0 0;
+  animation:stageFlash 0.5s ease 1s both;
+  opacity:0;
+}
+@keyframes stageFlash{from{opacity:0;transform:scale(2);}to{opacity:1;transform:scale(1);}}
 
-    .nav-links a:hover {
-      color: #2563eb;
-    }
+#hero{
+  position:relative;
+  padding:7rem 20px 4rem;
+  min-height:100vh;
+  display:flex;align-items:center;
+  z-index:1;
+}
+.hero-inner{
+  max-width:1300px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;
+}
+.hero-left{animation:slideInLeft 1s ease 0.5s both;}
+@keyframes slideInLeft{from{transform:translateX(-80px);opacity:0;}to{transform:translateX(0);opacity:1;}}
 
-    /* Hero Section */
-    .hero {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      align-items: center;
-      padding: 6rem 0;
-    }
+.hero-title{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(1.5rem,4vw,3.5rem);
+  line-height:1.4;
+  margin-bottom:1.5rem;
+  text-shadow:0 0 20px var(--neon-green),0 0 40px var(--neon-green);
+  animation:glitchTitle 5s ease 2s infinite;
+}
+@keyframes glitchTitle{
+  0%,95%,100%{transform:translate(0);filter:none;}
+  96%{transform:translate(-2px,1px);filter:hue-rotate(90deg);}
+  97%{transform:translate(2px,-1px);filter:hue-rotate(180deg);}
+  98%{transform:translate(-1px,2px);filter:hue-rotate(270deg);}
+  99%{transform:translate(1px,-2px);filter:none;}
+}
+.hero-title span{color:var(--neon-cyan);text-shadow:0 0 20px var(--neon-cyan);}
 
-    .hero-content h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 3.5rem;
-      line-height: 1.2;
-      margin-bottom: 1.5rem;
-      color: #1a1a1a;
-    }
+.hero-desc{
+  font-size:0.85rem;color:rgba(0,255,65,0.75);
+  line-height:2;margin-bottom:2rem;border-left:3px solid var(--neon-green);
+  padding-left:1rem;
+}
 
-    .hero-content p {
-      font-size: 1.1rem;
-      color: #666;
-      margin-bottom: 2rem;
-      line-height: 1.8;
-    }
+.cta-row{display:flex;gap:1rem;flex-wrap:wrap;}
+.game-btn{
+  font-family:'Press Start 2P',monospace;
+  font-size:0.5rem;
+  padding:12px 20px;
+  border:2px solid;
+  text-decoration:none;
+  position:relative;
+  overflow:hidden;
+  transition:all 0.2s;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.game-btn::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:rgba(255,255,255,0.1);transition:left 0.3s ease;
+}
+.game-btn:hover::before{left:100%;}
+.game-btn:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0px currentColor;}
+.game-btn:active{transform:translate(2px,2px);box-shadow:none;}
 
-    .cta-buttons {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
+.btn-green{background:transparent;color:var(--neon-green);border-color:var(--neon-green);box-shadow:0 0 10px rgba(0,255,65,0.3);}
+.btn-cyan{background:transparent;color:var(--neon-cyan);border-color:var(--neon-cyan);box-shadow:0 0 10px rgba(0,245,255,0.3);}
+.btn-pink{background:transparent;color:var(--neon-pink);border-color:var(--neon-pink);box-shadow:0 0 10px rgba(255,0,110,0.3);}
 
-    .btn {
-      padding: 12px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-    }
+/* Character stats panel */
+.char-panel{
+  border:2px solid var(--neon-green);
+  background:var(--dark-card);
+  padding:1.5rem;
+  position:relative;
+  animation:slideInRight 1s ease 0.7s both;
+  box-shadow:0 0 30px rgba(0,255,65,0.15),inset 0 0 30px rgba(0,255,65,0.03);
+}
+@keyframes slideInRight{from{transform:translateX(80px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.char-panel::before{
+  content:'BENCH-01 UNIT';
+  position:absolute;top:-14px;left:16px;
+  font-family:'Press Start 2P',monospace;font-size:0.5rem;
+  background:var(--dark-bg);padding:0 8px;color:var(--neon-green);
+}
+.char-panel::after{
+  content:'▶▶';position:absolute;bottom:8px;right:12px;
+  font-size:0.7rem;color:var(--neon-cyan);animation:blinkText 1.5s step-end infinite;
+}
 
-    .btn-primary {
-      background: linear-gradient(135deg, #2563eb, #1e40af);
-      color: white;
-      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-    }
+.char-sprite{
+  text-align:center;padding:1rem 0;font-size:3rem;
+  animation:charFloat 2s ease-in-out infinite;
+  filter:drop-shadow(0 0 10px var(--neon-cyan));
+}
+@keyframes charFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
-    }
+.char-name{
+  font-family:'Press Start 2P',monospace;font-size:0.7rem;
+  color:var(--neon-yellow);text-align:center;margin-bottom:1rem;
+  text-shadow:0 0 10px var(--neon-yellow);
+}
 
-    .btn-secondary {
-      background: white;
-      color: #2563eb;
-      border: 2px solid #2563eb;
-    }
+.char-stats-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.char-stat{display:flex;align-items:center;gap:10px;font-size:0.6rem;}
+.char-stat-name{color:rgba(0,255,65,0.7);width:100px;flex-shrink:0;font-size:0.45rem;}
+.char-stat-bar{flex:1;height:12px;background:rgba(0,255,65,0.1);border:1px solid rgba(0,255,65,0.3);overflow:hidden;position:relative;}
+.char-stat-fill{height:100%;position:relative;animation:statLoad 1.5s ease both;}
+@keyframes statLoad{from{width:0!important;}to{}}
+.char-stat-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,0.1) 0,rgba(255,255,255,0.1) 4px,transparent 4px,transparent 8px);}
+.stat-val{color:var(--neon-yellow);font-size:0.45rem;width:30px;text-align:right;}
 
-    .btn-secondary:hover {
-      background: #f0f4ff;
-      transform: translateY(-2px);
-    }
+.powered-list{margin-top:1.5rem;list-style:none;display:flex;flex-direction:column;gap:6px;}
+.powered-list li{
+  font-size:0.55rem;color:var(--neon-cyan);
+  padding:6px 10px;border:1px solid rgba(0,245,255,0.2);
+  display:flex;align-items:center;gap:8px;
+  transition:all 0.2s;
+}
+.powered-list li:hover{background:rgba(0,245,255,0.05);border-color:var(--neon-cyan);padding-left:20px;}
+.powered-list li .icon{width:20px;text-align:center;}
 
-    .hero-visual {
-      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-      border-radius: 16px;
-      padding: 2rem;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: 400px;
-      box-shadow: 0 20px 40px rgba(37, 99, 235, 0.2);
-    }
+/* ===== SECTION WRAPPER ===== */
+.section-wrap{position:relative;z-index:1;padding:4rem 20px;}
+.section-inner{max-width:1300px;margin:0 auto;}
 
-    .hero-visual h2 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
+.section-header{
+  text-align:center;margin-bottom:3rem;
+  position:relative;
+}
+.section-tag{
+  display:inline-block;
+  font-family:'Press Start 2P',monospace;font-size:0.45rem;
+  color:var(--neon-pink);letter-spacing:4px;
+  border:1px solid var(--neon-pink);padding:4px 12px;margin-bottom:1rem;
+}
+.section-title{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(1rem,3vw,2rem);
+  color:var(--neon-green);
+  text-shadow:0 0 20px var(--neon-green);
+  margin-bottom:0.5rem;
+}
+.section-sub{font-size:0.7rem;color:rgba(0,255,65,0.6);}
 
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-      padding: 4rem 0;
-    }
+.divider{
+  border:none;height:1px;
+  background:linear-gradient(90deg,transparent,var(--neon-green),transparent);
+  margin:0;opacity:0.3;
+}
 
-    .feature-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
-    }
+/* ===== FEATURE CARDS (SKILL CARDS) ===== */
+.skill-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;
+}
+.skill-card{
+  border:2px solid rgba(0,255,65,0.3);
+  background:var(--dark-card);
+  padding:1.5rem;
+  position:relative;
+  overflow:hidden;
+  transition:all 0.3s ease;
+  cursor:none;
+}
+.skill-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,255,65,0.05),transparent);
+  opacity:0;transition:opacity 0.3s;
+}
+.skill-card:hover::before{opacity:1;}
+.skill-card:hover{
+  border-color:var(--neon-green);
+  box-shadow:0 0 20px rgba(0,255,65,0.2),0 0 40px rgba(0,255,65,0.1),inset 0 0 20px rgba(0,255,65,0.05);
+  transform:translateY(-4px);
+}
+.skill-card::after{
+  content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,65,0.1),transparent);
+  transition:left 0.6s ease;
+}
+.skill-card:hover::after{left:150%;}
+.card-corner{
+  position:absolute;width:12px;height:12px;
+  border-color:var(--neon-green);border-style:solid;
+}
+.card-corner.tl{top:6px;left:6px;border-width:2px 0 0 2px;}
+.card-corner.tr{top:6px;right:6px;border-width:2px 2px 0 0;}
+.card-corner.bl{bottom:6px;left:6px;border-width:0 0 2px 2px;}
+.card-corner.br{bottom:6px;right:6px;border-width:0 2px 2px 0;}
 
-    .feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    }
+.card-rank{
+  position:absolute;top:12px;right:40px;
+  font-family:'Press Start 2P',monospace;font-size:0.4rem;
+  color:var(--neon-yellow);
+  border:1px solid var(--neon-yellow);padding:2px 6px;
+}
+.card-icon{font-size:2.5rem;margin-bottom:1rem;display:block;
+  filter:drop-shadow(0 0 8px rgba(0,255,65,0.5));
+}
+.card-title{
+  font-family:'Press Start 2P',monospace;font-size:0.6rem;
+  color:var(--neon-cyan);margin-bottom:0.8rem;
+  text-shadow:0 0 8px var(--neon-cyan);
+}
+.card-desc{font-size:0.65rem;color:rgba(0,255,65,0.75);line-height:1.8;}
+.card-power{
+  margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(0,255,65,0.2);
+  display:flex;align-items:center;gap:8px;font-size:0.45rem;
+  color:rgba(0,255,65,0.6);
+}
+.power-bar{flex:1;height:6px;background:rgba(0,255,65,0.1);border:1px solid rgba(0,255,65,0.2);}
+.power-fill{height:100%;background:var(--neon-green);box-shadow:0 0 6px var(--neon-green);}
 
-    .feature-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-    }
+/* ===== QUEST / DEPLOYMENT SECTION ===== */
+.quest-track{
+  display:flex;flex-direction:column;gap:0;
+  position:relative;
+  max-width:800px;margin:0 auto;
+}
+.quest-connector{
+  width:2px;height:40px;background:linear-gradient(180deg,var(--neon-green),rgba(0,255,65,0.3));
+  margin-left:39px;
+}
+.quest-step{
+  display:flex;gap:1.5rem;align-items:flex-start;
+  position:relative;
+}
+.step-num{
+  width:80px;height:80px;flex-shrink:0;
+  border:2px solid var(--neon-yellow);
+  background:var(--dark-card);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Press Start 2P',monospace;font-size:1.5rem;
+  color:var(--neon-yellow);
+  text-shadow:0 0 10px var(--neon-yellow);
+  position:relative;
+  transition:all 0.3s;
+  box-shadow:0 0 15px rgba(255,230,0,0.1);
+}
+.step-num:hover{box-shadow:0 0 30px rgba(255,230,0,0.4);border-color:var(--neon-yellow);}
+.step-content{
+  border:1px solid rgba(0,255,65,0.25);
+  background:var(--dark-card);
+  padding:1.2rem;flex:1;
+  transition:all 0.3s;
+}
+.step-content:hover{border-color:var(--neon-green);box-shadow:0 0 15px rgba(0,255,65,0.1);}
+.step-tag{
+  font-family:'Press Start 2P',monospace;font-size:0.35rem;
+  color:var(--neon-pink);letter-spacing:2px;margin-bottom:6px;
+}
+.step-title{
+  font-family:'Press Start 2P',monospace;font-size:0.65rem;
+  color:var(--neon-cyan);margin-bottom:6px;
+}
+.step-desc{font-size:0.65rem;color:rgba(0,255,65,0.7);line-height:1.8;}
+.step-reward{
+  margin-top:10px;display:flex;gap:8px;align-items:center;
+  font-size:0.45rem;color:var(--neon-yellow);
+}
 
-    .feature-card h3 {
-      font-size: 1.3rem;
-      margin-bottom: 0.5rem;
-      color: #1a1a1a;
-    }
+/* ===== TECH TREE ===== */
+.tech-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1.5rem;
+}
+.tech-card{
+  border:1px solid rgba(0,245,255,0.25);
+  background:var(--dark-card);padding:1.5rem;
+  position:relative;transition:all 0.3s;
+}
+.tech-card:hover{border-color:var(--neon-cyan);transform:scale(1.02);box-shadow:0 0 20px rgba(0,245,255,0.15);}
+.tech-layer{
+  font-family:'Press Start 2P',monospace;font-size:0.35rem;
+  color:var(--neon-pink);letter-spacing:2px;margin-bottom:8px;
+}
+.tech-name{
+  font-family:'Press Start 2P',monospace;font-size:0.6rem;
+  color:var(--neon-cyan);margin-bottom:0.8rem;
+}
+.tech-desc{font-size:0.6rem;color:rgba(0,245,255,0.7);line-height:1.8;}
+.tech-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:1rem;}
+.tag{font-family:'Press Start 2P',monospace;font-size:0.3rem;
+  border:1px solid rgba(0,255,65,0.4);padding:3px 8px;color:rgba(0,255,65,0.7);}
 
-    .feature-card p {
-      color: #666;
-      font-size: 0.95rem;
-    }
+/* ===== TERMINAL SECTION ===== */
+#terminal-section{
+  padding:4rem 20px;
+  background:linear-gradient(180deg,transparent,rgba(0,20,10,0.8),transparent);
+}
+.terminal{
+  max-width:900px;margin:0 auto;
+  border:2px solid var(--neon-green);
+  background:#000;
+  font-family:'Share Tech Mono',monospace;
+  box-shadow:0 0 40px rgba(0,255,65,0.2),inset 0 0 40px rgba(0,0,0,0.5);
+}
+.term-header{
+  background:rgba(0,255,65,0.1);padding:8px 16px;
+  border-bottom:1px solid rgba(0,255,65,0.3);
+  display:flex;align-items:center;gap:8px;
+}
+.term-dot{width:12px;height:12px;border-radius:50%;}
+.term-dot.r{background:#ff5f56;}
+.term-dot.y{background:#ffbd2e;}
+.term-dot.g{background:#27c93f;}
+.term-title{margin-left:auto;font-size:0.6rem;color:rgba(0,255,65,0.6);}
+.term-body{padding:1.5rem;min-height:300px;font-size:0.75rem;line-height:2;}
+.term-line{color:rgba(0,255,65,0.9);margin-bottom:4px;}
+.term-line.cmd{color:var(--neon-cyan);}
+.term-line.ok{color:var(--neon-green);}
+.term-line.warn{color:var(--neon-yellow);}
+.term-line.success{color:var(--neon-pink);}
+.term-cursor{display:inline-block;width:8px;height:1em;background:var(--neon-green);animation:blinkText 1s step-end infinite;vertical-align:middle;}
+#termInput{
+  display:flex;align-items:center;padding:8px 16px;
+  border-top:1px solid rgba(0,255,65,0.3);gap:8px;
+}
+#termInput span{color:var(--neon-cyan);font-size:0.75rem;white-space:nowrap;}
+#termInputField{
+  background:transparent;border:none;outline:none;
+  color:var(--neon-green);font-family:'Share Tech Mono',monospace;
+  font-size:0.75rem;flex:1;
+}
 
-    /* Section */
-    section {
-      padding: 4rem 0;
-    }
+/* ===== ACHIEVEMENT POPUP ===== */
+#achievePopup{
+  position:fixed;bottom:20px;right:20px;
+  background:var(--dark-card);border:2px solid var(--neon-yellow);
+  padding:16px;z-index:9000;
+  font-family:'Press Start 2P',monospace;
+  transform:translateX(300px);transition:transform 0.4s ease;
+  box-shadow:0 0 20px rgba(255,230,0,0.3);
+  max-width:260px;
+}
+#achievePopup.show{transform:translateX(0);}
+.achieve-icon{font-size:1.5rem;margin-bottom:8px;}
+.achieve-title{font-size:0.45rem;color:var(--neon-yellow);margin-bottom:4px;}
+.achieve-name{font-size:0.55rem;color:#fff;}
 
-    section h2 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      color: #1a1a1a;
-    }
+/* ===== PARTICLE CANVAS ===== */
+#particleCanvas{
+  position:fixed;inset:0;pointer-events:none;z-index:2;
+  opacity:0.6;
+}
 
-    .section-subtitle {
-      font-size: 1.1rem;
-      color: #666;
-      margin-bottom: 2rem;
-    }
+/* ===== CLICK EXPLOSION ===== */
+.explosion{
+  position:fixed;pointer-events:none;z-index:9999;
+  font-family:'Press Start 2P',monospace;font-size:0.7rem;
+  color:var(--neon-yellow);animation:explode 0.8s ease forwards;
+}
+@keyframes explode{
+  0%{transform:translate(-50%,-50%) scale(0.5);opacity:1;}
+  100%{transform:translate(-50%,-100px) scale(1.5);opacity:0;}
+}
 
-    /* Footer */
-    footer {
-      background: #1a1a1a;
-      color: white;
-      text-align: center;
-      padding: 2rem 0;
-      margin-top: 4rem;
-    }
+/* ===== BOSS BATTLE (DEPLOY BTN) ===== */
+.boss-section{
+  text-align:center;padding:4rem 20px;
+  position:relative;z-index:1;
+}
+.boss-intro{
+  font-family:'Press Start 2P',monospace;font-size:0.5rem;
+  color:var(--neon-pink);letter-spacing:3px;margin-bottom:1rem;
+  animation:blinkText 2s step-end infinite;
+}
+.boss-btn{
+  font-family:'Press Start 2P',monospace;font-size:clamp(0.6rem,2vw,1rem);
+  padding:20px 40px;
+  background:transparent;
+  color:var(--neon-pink);border:3px solid var(--neon-pink);
+  cursor:none;position:relative;overflow:hidden;
+  transition:all 0.3s;
+  box-shadow:0 0 20px rgba(255,0,110,0.3),0 0 40px rgba(255,0,110,0.1);
+  text-transform:uppercase;letter-spacing:2px;
+}
+.boss-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,0,110,0.1),transparent);
+  animation:bossPulse 2s ease-in-out infinite;
+}
+@keyframes bossPulse{0%,100%{opacity:0.5;}50%{opacity:1;}}
+.boss-btn:hover{
+  box-shadow:0 0 40px rgba(255,0,110,0.6),0 0 80px rgba(255,0,110,0.3);
+  transform:scale(1.05);
+  border-color:var(--neon-pink);
+}
+.boss-btn:active{transform:scale(0.97);}
 
-    footer p {
-      margin: 0.5rem 0;
-      color: #aaa;
-    }
+.boss-hp-wrap{max-width:500px;margin:2rem auto 0;}
+.boss-hp-label{
+  font-family:'Press Start 2P',monospace;font-size:0.4rem;
+  color:var(--neon-pink);text-align:left;margin-bottom:6px;
+  display:flex;justify-content:space-between;
+}
+.boss-hp-bar{height:20px;border:2px solid var(--neon-pink);background:rgba(255,0,110,0.1);overflow:hidden;}
+.boss-hp-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--neon-pink),#ff6699);transition:width 0.5s ease;box-shadow:0 0 10px var(--neon-pink);}
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .hero {
-        grid-template-columns: 1fr;
-        padding: 3rem 0;
-      }
+/* ===== SCORE DISPLAY ===== */
+.score-wrap{text-align:center;margin-top:1rem;}
+.score-label{font-family:'Press Start 2P',monospace;font-size:0.35rem;color:rgba(0,255,65,0.5);}
+.score-val{
+  font-family:'Press Start 2P',monospace;font-size:2rem;
+  color:var(--neon-yellow);text-shadow:0 0 20px var(--neon-yellow);
+}
 
-      .hero-content h1 {
-        font-size: 2.5rem;
-      }
+/* ===== FOOTER ===== */
+footer{
+  position:relative;z-index:1;
+  border-top:1px solid rgba(0,255,65,0.2);
+  background:rgba(0,0,0,0.6);
+  padding:3rem 20px;text-align:center;
+}
+.footer-logo{
+  font-family:'Press Start 2P',monospace;font-size:1rem;
+  color:var(--neon-green);text-shadow:0 0 10px var(--neon-green);
+  margin-bottom:1rem;
+}
+.footer-credits{
+  font-size:0.6rem;color:rgba(0,255,65,0.5);margin:0.5rem 0;
+}
+.footer-tip{
+  font-family:'Press Start 2P',monospace;font-size:0.4rem;
+  color:rgba(0,255,65,0.3);margin-top:1.5rem;
+  animation:blinkText 3s step-end infinite;
+}
 
-      .feature-grid {
-        grid-template-columns: 1fr;
-      }
+/* ===== GLITCH TEXT ===== */
+.glitch{position:relative;}
+.glitch::before,.glitch::after{
+  content:attr(data-text);
+  position:absolute;inset:0;
+  pointer-events:none;
+}
+.glitch::before{
+  color:var(--neon-cyan);
+  clip-path:polygon(0 0,100% 0,100% 35%,0 35%);
+  animation:glitch1 3s infinite;
+  opacity:0;
+}
+.glitch::after{
+  color:var(--neon-pink);
+  clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%);
+  animation:glitch2 3s infinite;
+  opacity:0;
+}
+@keyframes glitch1{0%,94%,100%{transform:translate(0);opacity:0;}95%{transform:translate(-3px,1px);opacity:1;}97%{transform:translate(3px,-1px);opacity:1;}}
+@keyframes glitch2{0%,94%,100%{transform:translate(0);opacity:0;}96%{transform:translate(3px,1px);opacity:1;}98%{transform:translate(-3px,-1px);opacity:1;}}
 
-      .nav-links {
-        gap: 1rem;
-      }
+/* ===== SCROLL REVEAL ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:all 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
 
-      .cta-buttons {
-        flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
-        text-align: center;
-      }
-    }
-  </style>
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .hero-inner{grid-template-columns:1fr;}
+  .hud-nav{display:none;}
+  .lv-badge{display:none;}
+}
+</style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav>
-    <div class="container">
-      <div class="nav-content">
-        <a href="#" class="logo">
-          <div class="logo-icon">B</div>
-          Bench 01
-        </a>
-        <ul class="nav-links">
-          <li><a href="#features">Features</a></li>
-          <li><a href="#deployment">Deployment</a></li>
-          <li><a href="#about">About</a></li>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+
+<!-- Particle canvas -->
+<canvas id="particleCanvas"></canvas>
+
+<!-- Grid bg -->
+<div class="grid-bg"></div>
+
+<!-- Achievement popup -->
+<div id="achievePopup">
+  <div class="achieve-icon">🏆</div>
+  <div class="achieve-title">ACHIEVEMENT UNLOCKED!</div>
+  <div class="achieve-name" id="achieveName">—</div>
+</div>
+
+<!-- ============ BOOT SCREEN ============ -->
+<div id="bootScreen">
+  <div class="boot-logo">BENCH::01</div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,255,65,0.6);margin-bottom:1rem;">DEVOPS INFRASTRUCTURE RPG v2.0</div>
+  <div class="boot-bar-wrap">
+    <div class="boot-bar-label" id="bootLabel">INITIALIZING SYSTEMS...</div>
+    <div class="boot-bar"><div class="boot-bar-fill" id="bootFill"></div></div>
+    <div class="boot-text" id="bootText"></div>
+    <div class="press-start" id="pressStart" style="display:none;">▼ PRESS ANY KEY TO START ▼</div>
+  </div>
+</div>
+
+<!-- ============ HUD ============ -->
+<div id="hud">
+  <div class="hud-logo">▸ BENCH01</div>
+  <div class="hud-stats">
+    <div class="stat-block">
+      <span class="stat-label">HP ████</span>
+      <div class="stat-bar"><div class="stat-fill hp" id="hudHp"></div></div>
+    </div>
+    <div class="stat-block">
+      <span class="stat-label">XP ████</span>
+      <div class="stat-bar"><div class="stat-fill xp" id="hudXp"></div></div>
+    </div>
+    <div class="stat-block">
+      <span class="stat-label">MP ████</span>
+      <div class="stat-bar"><div class="stat-fill mp" id="hudMp"></div></div>
+    </div>
+  </div>
+  <ul class="hud-nav">
+    <li><a href="#features">SKILLS</a></li>
+    <li><a href="#quests">QUESTS</a></li>
+    <li><a href="#stack">TECH TREE</a></li>
+  </ul>
+  <div class="lv-badge">LV.<span id="playerLevel">01</span></div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="hero-inner container" style="max-width:1300px;margin:0 auto;">
+    <div class="hero-left">
+      <div class="stage-intro">◀◀ STAGE 1: DEPLOYMENT BEGINS ▶▶</div>
+      <h1 class="hero-title glitch" data-text="NEXT-GEN DEPLOYMENT">NEXT-GEN<br/><span>DEPLOYMENT</span></h1>
+      <p class="hero-desc">
+        ⚡ Bench 01 orchestrates your entire DevOps pipeline.<br/>
+        Terraform provisions. Ansible configures.<br/>
+        GitHub Actions deploys. You win.
+      </p>
+      <div class="cta-row">
+        <a href="#features" class="game-btn btn-green" onclick="addXP(20);spawnExplosion(event,'⚡+20XP')">▶ START GAME</a>
+        <a href="#quests" class="game-btn btn-cyan" onclick="addXP(10);spawnExplosion(event,'★+10XP')">☰ VIEW QUESTS</a>
+        <a href="#terminal-section" class="game-btn btn-pink" onclick="addXP(15);spawnExplosion(event,'💻+15XP')">█ OPEN TERMINAL</a>
+      </div>
+      <div class="score-wrap" style="text-align:left;margin-top:1.5rem;">
+        <div class="score-label">SCORE</div>
+        <div class="score-val" id="scoreDisplay">000000</div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="char-panel">
+        <div class="char-sprite" id="charSprite">🤖</div>
+        <div class="char-name">BENCH-01 UNIT</div>
+        <ul class="char-stats-list">
+          <li class="char-stat">
+            <span class="char-stat-name">TERRAFORM</span>
+            <div class="char-stat-bar">
+              <div class="char-stat-fill" style="width:95%;background:linear-gradient(90deg,#00ff41,#00c833);animation-delay:0.1s;"></div>
+            </div>
+            <span class="stat-val">95</span>
+          </li>
+          <li class="char-stat">
+            <span class="char-stat-name">ANSIBLE</span>
+            <div class="char-stat-bar">
+              <div class="char-stat-fill" style="width:88%;background:linear-gradient(90deg,#00f5ff,#00a8b5);animation-delay:0.2s;"></div>
+            </div>
+            <span class="stat-val">88</span>
+          </li>
+          <li class="char-stat">
+            <span class="char-stat-name">NGINX</span>
+            <div class="char-stat-bar">
+              <div class="char-stat-fill" style="width:92%;background:linear-gradient(90deg,#ff6600,#cc5200);animation-delay:0.3s;"></div>
+            </div>
+            <span class="stat-val">92</span>
+          </li>
+          <li class="char-stat">
+            <span class="char-stat-name">CI/CD</span>
+            <div class="char-stat-bar">
+              <div class="char-stat-fill" style="width:99%;background:linear-gradient(90deg,#ff006e,#cc0058);animation-delay:0.4s;"></div>
+            </div>
+            <span class="stat-val">99</span>
+          </li>
+          <li class="char-stat">
+            <span class="char-stat-name">UPTIME</span>
+            <div class="char-stat-bar">
+              <div class="char-stat-fill" style="width:100%;background:linear-gradient(90deg,#ffe600,#ccb800);animation-delay:0.5s;"></div>
+            </div>
+            <span class="stat-val">MAX</span>
+          </li>
+        </ul>
+        <ul class="powered-list">
+          <li><span class="icon">🏗️</span> Terraform IaC</li>
+          <li><span class="icon">⚙️</span> Ansible Automation</li>
+          <li><span class="icon">🌐</span> Nginx Web Server</li>
+          <li><span class="icon">🚀</span> GitHub Actions CI/CD</li>
+          <li><span class="icon">✅</span> Production Ready</li>
         </ul>
       </div>
     </div>
-  </nav>
+  </div>
+</section>
 
-  <!-- Hero Section -->
-  <section class="hero" style="padding-top: 4rem;">
-    <div class="container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
-      <div class="hero-content">
-        <h1>Deploy with Confidence</h1>
-        <p>Bench 01 is your modern DevOps landing page. Built with Terraform infrastructure provisioning and Ansible configuration management, it brings your infrastructure to life with clean deployment workflows.</p>
-        <div class="cta-buttons">
-          <a href="#features" class="btn btn-primary">Explore Features</a>
-          <a href="#deployment" class="btn btn-secondary">See Deployment</a>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <h2>Infrastructure Ready</h2>
-        <p style="font-size: 1.05rem; opacity: 0.9;">
-          ✓ Terraform provisioned VMs<br>
-          ✓ Ansible automated deployment<br>
-          ✓ Nginx web server<br>
-          ✓ GitHub Actions CI/CD<br>
-          ✓ Production ready
-        </p>
-      </div>
+<hr class="divider"/>
+
+<!-- ============ FEATURES / SKILL CARDS ============ -->
+<section id="features" class="section-wrap">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag">◈ SKILL TREE ◈</div>
+      <h2 class="section-title glitch" data-text="WHY CHOOSE BENCH 01?">WHY CHOOSE BENCH 01?</h2>
+      <p class="section-sub">UNLOCK YOUR DEVOPS ABILITIES — CLICK CARDS TO GAIN XP</p>
     </div>
-  </section>
-
-  <!-- Features Section -->
-  <section id="features">
-    <div class="container">
-      <h2>Why Bench 01?</h2>
-      <p class="section-subtitle">Modern infrastructure deployment made simple and reliable</p>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-icon">🏗️</div>
-          <h3>Infrastructure as Code</h3>
-          <p>Terraform-based infrastructure that's version-controlled, repeatable, and auditable. Define your AWS resources once, deploy everywhere.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">⚙️</div>
-          <h3>Configuration Management</h3>
-          <p>Ansible playbooks automate Nginx setup and application deployment. No manual SSH sessions, just idempotent automation.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🚀</div>
-          <h3>CI/CD Integration</h3>
-          <p>GitHub Actions workflows trigger automatic deployments. Push to bench_01 branch and watch your infrastructure update in real-time.</p>
+    <div class="skill-grid">
+      <div class="skill-card reveal" onclick="cardFlip(this,20,'IaC MASTERED!')">
+        <div class="card-corner tl"></div><div class="card-corner tr"></div>
+        <div class="card-corner bl"></div><div class="card-corner br"></div>
+        <div class="card-rank">S RANK</div>
+        <span class="card-icon">🏗️</span>
+        <div class="card-title">IaC EXCELLENCE</div>
+        <div class="card-desc">Terraform transforms your infrastructure into code. Version control, repeatability, and auditability — all at your fingertips. Define AWS resources once, deploy everywhere.</div>
+        <div class="card-power">
+          <span>PWR</span>
+          <div class="power-bar"><div class="power-fill" style="width:95%"></div></div>
+          <span>95</span>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Deployment Section -->
-  <section id="deployment">
-    <div class="container">
-      <h2>Deploy in 3 Steps</h2>
-      <p class="section-subtitle">From code to production in minutes</p>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-icon">1️⃣</div>
-          <h3>Provision Infrastructure</h3>
-          <p>Run Terraform workflow on GitHub Actions. Specify AWS credentials, region, and instance count. EC2 instances launch automatically.</p>
+      <div class="skill-card reveal" style="transition-delay:0.1s" onclick="cardFlip(this,25,'ANSIBLE UNLOCKED!')">
+        <div class="card-corner tl"></div><div class="card-corner tr"></div>
+        <div class="card-corner bl"></div><div class="card-corner br"></div>
+        <div class="card-rank">S RANK</div>
+        <span class="card-icon">⚙️</span>
+        <div class="card-title">AGENTLESS CONFIG</div>
+        <div class="card-desc">Ansible playbooks orchestrate your entire environment. No agents, no bloat — pure declarative automation. Idempotent runs ensure consistent production state every time.</div>
+        <div class="card-power">
+          <span>PWR</span>
+          <div class="power-bar"><div class="power-fill" style="width:88%"></div></div>
+          <span>88</span>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">2️⃣</div>
-          <h3>Configure with Ansible</h3>
-          <p>Trigger Ansible playbook with server IP. Nginx installs, SSL configures, and your site deploys. All automated and idempotent.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">3️⃣</div>
-          <h3>Access Your Site</h3>
-          <p>Visit your server's public IP in any browser. Your application is live, monitored, and ready for production traffic.</p>
+      </div>
+
+      <div class="skill-card reveal" style="transition-delay:0.2s" onclick="cardFlip(this,30,'CI/CD GOD MODE!')">
+        <div class="card-corner tl"></div><div class="card-corner tr"></div>
+        <div class="card-corner bl"></div><div class="card-corner br"></div>
+        <div class="card-rank">SSS</div>
+        <span class="card-icon">🚀</span>
+        <div class="card-title">CI/CD MASTERY</div>
+        <div class="card-desc">GitHub Actions automates everything. Push code, trigger workflows, deploy to production — all in seconds. Zero downtime. Full auditability. Infinite scalability.</div>
+        <div class="card-power">
+          <span>PWR</span>
+          <div class="power-bar"><div class="power-fill" style="width:99%"></div></div>
+          <span>99</span>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- About Section -->
-  <section id="about">
-    <div class="container">
-      <h2>The Bench 01 Stack</h2>
-      <p class="section-subtitle">Production-grade technologies for reliable deployments</p>
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
-        <div class="feature-card">
-          <h3>Frontend</h3>
-          <p><strong>Nginx:</strong> High-performance reverse proxy and web server. Handles static assets, SSL termination, and load balancing with minimal resource overhead.</p>
+<hr class="divider"/>
+
+<!-- ============ QUESTS / DEPLOYMENT ============ -->
+<section id="quests" class="section-wrap">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag">◈ ACTIVE QUESTS ◈</div>
+      <h2 class="section-title">DEPLOY IN 3 STEPS</h2>
+      <p class="section-sub">COMPLETE ALL QUESTS TO UNLOCK PRODUCTION MODE</p>
+    </div>
+    <div class="quest-track">
+      <div class="quest-step reveal">
+        <div class="step-num" onclick="completeQuest(this,1)">1</div>
+        <div class="step-content">
+          <div class="step-tag">★ QUEST I ★</div>
+          <div class="step-title">PROVISION INFRASTRUCTURE</div>
+          <div class="step-desc">Terraform spins up your AWS infrastructure instantly. Secure, scalable, and completely reproducible. EC2 instances, security groups, VPCs — all from code.</div>
+          <div class="step-reward">🏆 REWARD: +50 XP &nbsp; ⚡ TERRAFORM BADGE</div>
         </div>
-        <div class="feature-card">
-          <h3>Infrastructure</h3>
-          <p><strong>Terraform:</strong> AWS EC2 instances, security groups, and networking. Infrastructure versioning, state management, and disaster recovery built-in.</p>
+      </div>
+      <div class="quest-connector"></div>
+      <div class="quest-step reveal" style="transition-delay:0.15s">
+        <div class="step-num" onclick="completeQuest(this,2)">2</div>
+        <div class="step-content">
+          <div class="step-tag">★ QUEST II ★</div>
+          <div class="step-title">CONFIGURE WITH ANSIBLE</div>
+          <div class="step-desc">Ansible ensures your servers match desired state. Idempotent, reliable, and production-tested. Install Nginx, deploy apps, configure services — without SSH sessions.</div>
+          <div class="step-reward">🏆 REWARD: +75 XP &nbsp; ⚙️ ANSIBLE BADGE</div>
         </div>
-        <div class="feature-card">
-          <h3>Orchestration</h3>
-          <p><strong>Ansible:</strong> Agentless configuration management. Playbooks define desired state; Ansible ensures compliance without system agents.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Automation</h3>
-          <p><strong>GitHub Actions:</strong> CI/CD workflows triggered on push. Terraform and Ansible runs orchestrated from version control.</p>
+      </div>
+      <div class="quest-connector"></div>
+      <div class="quest-step reveal" style="transition-delay:0.3s">
+        <div class="step-num" onclick="completeQuest(this,3)">3</div>
+        <div class="step-content">
+          <div class="step-tag">★ QUEST III ★</div>
+          <div class="step-title">DEPLOY &amp; GO LIVE</div>
+          <div class="step-desc">Your application goes live instantly. Monitored, logged, and ready for the world. Visit your server's public IP — your site is live and production-ready out of the box.</div>
+          <div class="step-reward">🏆 REWARD: +100 XP &nbsp; 🚀 DEPLOY MASTER</div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p><strong>Bench 01</strong> &mdash; Modern DevOps Landing Page</p>
-      <p>Built with Terraform, Ansible, and GitHub Actions</p>
-      <p style="margin-top: 2rem; color: #555;">Production-ready infrastructure automation</p>
+<hr class="divider"/>
+
+<!-- ============ TECH TREE / STACK ============ -->
+<section id="stack" class="section-wrap">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-tag">◈ TECH TREE ◈</div>
+      <h2 class="section-title glitch" data-text="THE BENCH 01 STACK">THE BENCH 01 STACK</h2>
+      <p class="section-sub">ENTERPRISE TECHNOLOGIES — HOVER TO INSPECT</p>
     </div>
-  </footer>
+    <div class="tech-grid">
+      <div class="tech-card reveal" onclick="addXP(15);spawnExplosion(event,'🌐 NGINX!')">
+        <div class="tech-layer">LAYER 1 :: FRONTEND</div>
+        <div class="tech-name">🌐 NGINX WEB SERVER</div>
+        <div class="tech-desc">High-performance reverse proxy and web server. SSL termination, load balancing, and static asset serving with minimal resource overhead. Battle-tested in production.</div>
+        <div class="tech-tags">
+          <span class="tag">REVERSE PROXY</span>
+          <span class="tag">SSL/TLS</span>
+          <span class="tag">LOAD BALANCER</span>
+        </div>
+      </div>
+      <div class="tech-card reveal" style="transition-delay:0.1s" onclick="addXP(15);spawnExplosion(event,'☁️ AWS!')">
+        <div class="tech-layer">LAYER 2 :: INFRASTRUCTURE</div>
+        <div class="tech-name">☁️ TERRAFORM ON AWS</div>
+        <div class="tech-desc">EC2 instances, security groups, VPCs, and networking — all as code. Infrastructure versioning, state management, and disaster recovery built right in.</div>
+        <div class="tech-tags">
+          <span class="tag">EC2</span>
+          <span class="tag">VPC</span>
+          <span class="tag">STATE MGMT</span>
+        </div>
+      </div>
+      <div class="tech-card reveal" style="transition-delay:0.2s" onclick="addXP(15);spawnExplosion(event,'⚙️ ANSIBLE!')">
+        <div class="tech-layer">LAYER 3 :: ORCHESTRATION</div>
+        <div class="tech-name">⚙️ ANSIBLE PLAYBOOKS</div>
+        <div class="tech-desc">Agentless configuration management. Playbooks define desired state; Ansible ensures compliance without system agents, bloat, or complexity.</div>
+        <div class="tech-tags">
+          <span class="tag">AGENTLESS</span>
+          <span class="tag">IDEMPOTENT</span>
+          <span class="tag">YAML</span>
+        </div>
+      </div>
+      <div class="tech-card reveal" style="transition-delay:0.3s" onclick="addXP(15);spawnExplosion(event,'⚡ CI/CD!')">
+        <div class="tech-layer">LAYER 4 :: AUTOMATION</div>
+        <div class="tech-name">⚡ GITHUB ACTIONS</div>
+        <div class="tech-desc">CI/CD workflows triggered on push. Terraform and Ansible runs orchestrated from version control with full history, auditability, and zero manual intervention.</div>
+        <div class="tech-tags">
+          <span class="tag">CI/CD</span>
+          <span class="tag">GIT PUSH</span>
+          <span class="tag">AUDIT LOG</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ============ TERMINAL ============ -->
+<div id="terminal-section">
+  <div class="section-inner" style="max-width:1300px;margin:0 auto;padding:0 20px;">
+    <div class="section-header reveal">
+      <div class="section-tag">◈ LIVE TERMINAL ◈</div>
+      <h2 class="section-title">COMMAND CENTER</h2>
+      <p class="section-sub">TRY: deploy / status / help / clear</p>
+    </div>
+    <div class="terminal reveal">
+      <div class="term-header">
+        <div class="term-dot r"></div>
+        <div class="term-dot y"></div>
+        <div class="term-dot g"></div>
+        <div class="term-title">bench01@devops ~ bash</div>
+      </div>
+      <div class="term-body" id="termBody">
+        <div class="term-line ok">██████████████████████████████████████████</div>
+        <div class="term-line ok">  BENCH 01 :: DEVOPS RPG v2.0 — READY</div>
+        <div class="term-line ok">██████████████████████████████████████████</div>
+        <div class="term-line">&nbsp;</div>
+        <div class="term-line warn">Type 'help' for available commands...</div>
+        <div class="term-line">&nbsp;</div>
+      </div>
+      <div id="termInput">
+        <span>bench01@aws:~$</span>
+        <input type="text" id="termInputField" placeholder="enter command..." autocomplete="off" spellcheck="false"/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" style="margin-top:4rem;"/>
+
+<!-- ============ BOSS BATTLE (BIG DEPLOY BTN) ============ -->
+<div class="boss-section">
+  <div class="boss-intro">⚠ FINAL BOSS BATTLE — CLICK TO DEFEAT ⚠</div>
+  <h2 class="section-title" style="margin-bottom:1.5rem;">DEPLOY TO PRODUCTION</h2>
+  <button class="boss-btn" id="bossBtn" onclick="bossAttack()">
+    ⚡ DEPLOY NOW ⚡
+  </button>
+  <div class="boss-hp-wrap">
+    <div class="boss-hp-label">
+      <span>DEPLOYMENT HP</span>
+      <span id="bossHpNum">100/100</span>
+    </div>
+    <div class="boss-hp-bar"><div class="boss-hp-fill" id="bossHpFill"></div></div>
+  </div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="footer-logo">▸ BENCH 01 ◂</div>
+  <div class="footer-credits">TERRAFORM • ANSIBLE • GITHUB ACTIONS • NGINX</div>
+  <div class="footer-credits" style="color:rgba(0,255,65,0.3)">ENGINEERED FOR EXCELLENCE. DESIGNED FOR INNOVATION.</div>
+  <div class="footer-tip">INSERT COIN TO CONTINUE ▼</div>
+</footer>
+
+<script>
+/* ===== CURSOR ===== */
+const cur = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top = e.clientY + 'px';
+});
+document.addEventListener('mousedown', () => cur.classList.add('active'));
+document.addEventListener('mouseup', () => cur.classList.remove('active'));
+
+/* ===== AUDIO (Web Audio API) ===== */
+let ctx;
+function initAudio() {
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+}
+function playBeep(freq=440, dur=0.1, type='square', vol=0.1) {
+  try {
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(); osc.stop(ctx.currentTime + dur);
+  } catch(e){}
+}
+function playSuccess() {
+  [523,659,784,1047].forEach((f,i) => setTimeout(() => playBeep(f,0.12,'sine',0.15), i*80));
+}
+function playClick() { playBeep(880, 0.06, 'square', 0.08); }
+function playLevelUp() {
+  [262,330,392,523,659,784,1047].forEach((f,i) => setTimeout(() => playBeep(f,0.1,'sine',0.2), i*60));
+}
+
+/* ===== BOOT SEQUENCE ===== */
+const bootMessages = [
+  'LOADING TERRAFORM MODULES...',
+  'INITIALIZING ANSIBLE PLAYBOOKS...',
+  'CONFIGURING NGINX...',
+  'CONNECTING TO AWS...',
+  'SETTING UP CI/CD PIPELINE...',
+  'RUNNING SECURITY CHECKS...',
+  'DEPLOYING TO PRODUCTION...',
+  'SYSTEMS ONLINE. WELCOME.',
+];
+let bootDone = false;
+function runBoot() {
+  const fill = document.getElementById('bootFill');
+  const label = document.getElementById('bootLabel');
+  const text = document.getElementById('bootText');
+  let progress = 0;
+  let msgIdx = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 3 + 1;
+    if (progress >= 100) { progress = 100; clearInterval(interval); bootComplete(); }
+    fill.style.width = progress + '%';
+    if (Math.floor(progress / 12.5) > msgIdx && msgIdx < bootMessages.length) {
+      text.innerHTML += bootMessages[msgIdx] + '<br/>';
+      label.textContent = bootMessages[msgIdx];
+      msgIdx++;
+    }
+  }, 60);
+}
+function bootComplete() {
+  document.getElementById('pressStart').style.display = 'block';
+  bootDone = true;
+}
+function dismissBoot() {
+  if (!bootDone) return;
+  initAudio();
+  playSuccess();
+  document.getElementById('bootScreen').classList.add('hide');
+  setTimeout(() => document.getElementById('bootScreen').remove(), 1000);
+  unlock('WELCOME BACK, COMMANDER');
+}
+document.addEventListener('keydown', dismissBoot);
+document.addEventListener('click', dismissBoot);
+runBoot();
+
+/* ===== SCORE & XP ===== */
+let score = 0, xp = 0, level = 1, bossHp = 100;
+function addScore(n) {
+  score += n;
+  document.getElementById('scoreDisplay').textContent = String(score).padStart(6,'0');
+}
+function addXP(n) {
+  initAudio(); playClick();
+  xp += n;
+  addScore(n * 10);
+  const bar = document.getElementById('hudXp');
+  const pct = Math.min((xp % 200) / 200 * 100, 100);
+  bar.style.width = pct + '%';
+  const newLevel = Math.floor(xp / 200) + 1;
+  if (newLevel > level) {
+    level = newLevel;
+    document.getElementById('playerLevel').textContent = String(level).padStart(2,'0');
+    playLevelUp();
+    unlock('LEVEL UP! LV.' + level);
+    shakeScreen();
+  }
+}
+
+/* ===== EXPLOSION TEXT ===== */
+function spawnExplosion(e, text) {
+  const el = document.createElement('div');
+  el.className = 'explosion';
+  el.textContent = text;
+  el.style.left = (e.clientX || e.pageX) + 'px';
+  el.style.top = (e.clientY || e.pageY) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+/* ===== ACHIEVEMENT ===== */
+const achievements = new Set();
+function unlock(name) {
+  if (achievements.has(name)) return;
+  achievements.add(name);
+  const popup = document.getElementById('achievePopup');
+  document.getElementById('achieveName').textContent = name;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 3000);
+}
+
+/* ===== CARD FLIP ===== */
+function cardFlip(card, xpAmt, msg) {
+  initAudio();
+  if (card.dataset.flipped) return;
+  card.dataset.flipped = '1';
+  card.style.borderColor = 'var(--neon-yellow)';
+  card.style.boxShadow = '0 0 30px rgba(255,230,0,0.4)';
+  card.style.transform = 'translateY(-8px) scale(1.02)';
+  addXP(xpAmt);
+  spawnExplosion({clientX: card.getBoundingClientRect().left + card.offsetWidth/2, clientY: card.getBoundingClientRect().top}, '⭐ +' + xpAmt + ' XP!');
+  unlock(msg);
+  playSuccess();
+}
+
+/* ===== QUEST COMPLETE ===== */
+const completedQuests = new Set();
+function completeQuest(btn, num) {
+  initAudio();
+  if (completedQuests.has(num)) return;
+  completedQuests.add(num);
+  btn.style.background = 'var(--neon-green)';
+  btn.style.color = '#000';
+  btn.style.boxShadow = '0 0 30px var(--neon-green)';
+  btn.textContent = '✓';
+  const rewards = {1:50, 2:75, 3:100};
+  addXP(rewards[num]);
+  spawnExplosion({clientX: btn.getBoundingClientRect().left + 40, clientY: btn.getBoundingClientRect().top}, '🏆 QUEST COMPLETE!');
+  const msgs = {1:'TERRAFORM BADGE EARNED', 2:'ANSIBLE BADGE EARNED', 3:'DEPLOY MASTER!'};
+  unlock(msgs[num]);
+  if (completedQuests.size === 3) {
+    setTimeout(() => { unlock('ALL QUESTS COMPLETE!'); shakeScreen(); }, 500);
+  }
+}
+
+/* ===== BOSS BATTLE ===== */
+function bossAttack() {
+  initAudio();
+  if (bossHp <= 0) return;
+  const dmg = Math.floor(Math.random() * 15 + 10);
+  bossHp = Math.max(0, bossHp - dmg);
+  const fill = document.getElementById('bossHpFill');
+  document.getElementById('bossHpNum').textContent = bossHp + '/100';
+  fill.style.width = bossHp + '%';
+  addXP(dmg);
+  spawnExplosion({clientX: window.innerWidth/2, clientY: window.innerHeight*0.6}, '-' + dmg + ' HP!');
+  shakeScreen();
+  playBeep(220, 0.2, 'sawtooth', 0.15);
+  if (bossHp <= 0) {
+    document.getElementById('bossBtn').textContent = '🎉 DEPLOYED! VICTORY!';
+    document.getElementById('bossBtn').style.color = 'var(--neon-yellow)';
+    document.getElementById('bossBtn').style.borderColor = 'var(--neon-yellow)';
+    addXP(200);
+    playLevelUp();
+    unlock('DEPLOYMENT COMPLETE! 🚀');
+    launchConfetti();
+  }
+}
+
+/* ===== SCREEN SHAKE ===== */
+function shakeScreen() {
+  document.body.style.animation = 'none';
+  document.body.style.transform = 'translate(-3px, -3px)';
+  setTimeout(() => { document.body.style.transform = 'translate(3px, 3px)'; }, 50);
+  setTimeout(() => { document.body.style.transform = 'translate(-2px, 2px)'; }, 100);
+  setTimeout(() => { document.body.style.transform = 'translate(0)'; }, 150);
+}
+
+/* ===== TERMINAL ===== */
+const termCmds = {
+  help: () => [
+    {c:'ok', t:'AVAILABLE COMMANDS:'},
+    {c:'cmd', t:'  deploy   — initiate deployment sequence'},
+    {c:'cmd', t:'  status   — check system status'},
+    {c:'cmd', t:'  terraform — run terraform plan'},
+    {c:'cmd', t:'  ansible  — run ansible playbook'},
+    {c:'cmd', t:'  nginx    — check nginx config'},
+    {c:'cmd', t:'  score    — display current score'},
+    {c:'cmd', t:'  clear    — clear terminal'},
+    {c:'warn', t:'  (all commands grant XP!)'},
+  ],
+  deploy: () => {
+    addXP(40); unlock('DEPLOY COMMAND EXECUTED');
+    return [
+      {c:'warn', t:'[GITHUB ACTIONS] Triggering workflow...'},
+      {c:'ok', t:'[TERRAFORM] Planning infrastructure...'},
+      {c:'ok', t:'[TERRAFORM] Apply complete! Resources: 4 added.'},
+      {c:'ok', t:'[ANSIBLE] Running playbook...'},
+      {c:'ok', t:'[ANSIBLE] PLAY RECAP: ok=8 changed=4 failed=0'},
+      {c:'ok', t:'[NGINX] Service started and enabled.'},
+      {c:'success', t:'✅ DEPLOYMENT SUCCESSFUL! +40 XP'},
+    ];
+  },
+  status: () => {
+    addXP(10);
+    return [
+      {c:'ok', t:'SYSTEM STATUS REPORT'},
+      {c:'ok', t:'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'},
+      {c:'ok', t:'[✓] Terraform: v1.9.0 — READY'},
+      {c:'ok', t:'[✓] Ansible: v2.17 — READY'},
+      {c:'ok', t:'[✓] Nginx: 1.25.3 — RUNNING'},
+      {c:'ok', t:'[✓] GitHub Actions: CONNECTED'},
+      {c:'ok', t:'[✓] AWS: AUTHENTICATED'},
+      {c:'success', t:'ALL SYSTEMS OPERATIONAL +10 XP'},
+    ];
+  },
+  terraform: () => {
+    addXP(25);
+    return [
+      {c:'cmd', t:'$ terraform plan'},
+      {c:'warn', t:'Refreshing state...'},
+      {c:'ok', t:'Plan: 2 to add, 0 to change, 0 to destroy.'},
+      {c:'cmd', t:'$ terraform apply --auto-approve'},
+      {c:'ok', t:'aws_instance.bench01: Creating...'},
+      {c:'ok', t:'aws_instance.bench01: Creation complete!'},
+      {c:'success', t:'INFRASTRUCTURE LIVE! +25 XP'},
+    ];
+  },
+  ansible: () => {
+    addXP(25);
+    return [
+      {c:'cmd', t:'$ ansible-playbook -i inventory setup.yml'},
+      {c:'warn', t:'PLAY [Configure servers] **************'},
+      {c:'ok', t:'TASK [Install Nginx]: ok=1 changed=1'},
+      {c:'ok', t:'TASK [Deploy app]: ok=1 changed=1'},
+      {c:'ok', t:'TASK [Start services]: ok=1 changed=1'},
+      {c:'success', t:'PLAY RECAP: ok=8 failed=0 +25 XP'},
+    ];
+  },
+  nginx: () => {
+    addXP(15);
+    return [
+      {c:'cmd', t:'$ nginx -t'},
+      {c:'ok', t:'nginx: the configuration file /etc/nginx/nginx.conf syntax is ok'},
+      {c:'ok', t:'nginx: configuration file /etc/nginx/nginx.conf test is successful'},
+      {c:'success', t:'NGINX HEALTHY! +15 XP'},
+    ];
+  },
+  score: () => [
+    {c:'success', t:'SCORE: ' + String(score).padStart(8,'0')},
+    {c:'ok', t:'XP: ' + xp + ' | LEVEL: ' + level},
+    {c:'ok', t:'ACHIEVEMENTS: ' + achievements.size},
+  ],
+  clear: () => 'CLEAR',
+};
+
+const input = document.getElementById('termInputField');
+const body = document.getElementById('termBody');
+
+function termPrint(lines, delay=30) {
+  if (lines === 'CLEAR') { body.innerHTML = ''; return; }
+  lines.forEach((l, i) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'term-line ' + l.c;
+      div.textContent = l.t;
+      body.appendChild(div);
+      body.scrollTop = body.scrollHeight;
+      playBeep(400 + i*20, 0.02, 'square', 0.03);
+    }, i * delay);
+  });
+}
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const val = input.value.trim().toLowerCase();
+    if (!val) return;
+    initAudio();
+    // Echo command
+    const echo = document.createElement('div');
+    echo.className = 'term-line cmd';
+    echo.textContent = 'bench01@aws:~$ ' + val;
+    body.appendChild(echo);
+    input.value = '';
+    // Execute
+    const fn = termCmds[val];
+    if (fn) {
+      const result = fn();
+      setTimeout(() => termPrint(result), 100);
+    } else {
+      setTimeout(() => termPrint([
+        {c:'warn', t: 'Command not found: ' + val},
+        {c:'warn', t: "Type 'help' for commands."},
+      ]), 100);
+      playBeep(150, 0.2, 'sawtooth', 0.1);
+    }
+    body.scrollTop = body.scrollHeight;
+  }
+});
+
+/* ===== PARTICLE SYSTEM ===== */
+const canvas = document.getElementById('particleCanvas');
+const pctx = canvas.getContext('2d');
+let particles = [];
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = canvas.height + 10;
+    this.vx = (Math.random() - 0.5) * 0.5;
+    this.vy = -(Math.random() * 1.5 + 0.5);
+    this.size = Math.random() * 2 + 1;
+    this.life = 1;
+    this.decay = Math.random() * 0.003 + 0.001;
+    this.color = ['#00ff41','#00f5ff','#ff006e','#ffe600'][Math.floor(Math.random()*4)];
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life -= this.decay;
+    if (this.life <= 0) this.reset();
+  }
+  draw() {
+    pctx.globalAlpha = this.life * 0.6;
+    pctx.fillStyle = this.color;
+    pctx.shadowBlur = 6;
+    pctx.shadowColor = this.color;
+    pctx.fillRect(this.x, this.y, this.size, this.size);
+  }
+}
+
+for (let i = 0; i < 60; i++) {
+  const p = new Particle();
+  p.y = Math.random() * canvas.height;
+  particles.push(p);
+}
+
+function animParticles() {
+  pctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  pctx.globalAlpha = 1;
+  requestAnimationFrame(animParticles);
+}
+animParticles();
+
+/* ===== CONFETTI ===== */
+function launchConfetti() {
+  const colors = ['#00ff41','#00f5ff','#ff006e','#ffe600','#ff6600'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.style.cssText = `
+        position:fixed;top:-10px;left:${Math.random()*100}vw;
+        width:${Math.random()*8+4}px;height:${Math.random()*8+4}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        z-index:9990;pointer-events:none;
+        animation:confettiFall ${Math.random()*2+1.5}s ease-in forwards;
+      `;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 3500);
+    }, i * 40);
+  }
+}
+
+/* Confetti keyframe */
+const styleEl = document.createElement('style');
+styleEl.textContent = `@keyframes confettiFall{from{transform:translateY(-10px) rotate(0deg);opacity:1;}to{transform:translateY(110vh) rotate(${Math.random()*720}deg);opacity:0;}}`;
+document.head.appendChild(styleEl);
+
+/* ===== SCROLL REVEAL ===== */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ===== XP ON SCROLL ===== */
+let lastScrollXP = 0;
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  const xpMilestone = Math.floor(pct * 10) * 10;
+  if (xpMilestone > lastScrollXP) {
+    lastScrollXP = xpMilestone;
+    addXP(5);
+  }
+  // Update MP bar based on scroll
+  document.getElementById('hudMp').style.width = (pct * 100) + '%';
+});
+
+/* ===== IDLE CHAR ANIMATION ===== */
+const sprites = ['🤖','⚡','🚀','🏗️','⚙️','🤖'];
+let sprIdx = 0;
+setInterval(() => {
+  sprIdx = (sprIdx + 1) % sprites.length;
+  document.getElementById('charSprite').textContent = sprites[sprIdx];
+}, 3000);
+
+/* ===== KONAMI CODE ===== */
+const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiIdx = 0;
+document.addEventListener('keydown', e => {
+  if (e.key === konami[konamiIdx]) {
+    konamiIdx++;
+    if (konamiIdx === konami.length) {
+      konamiIdx = 0;
+      addXP(500);
+      launchConfetti();
+      playLevelUp();
+      unlock('KONAMI CODE! +500 XP 🎮');
+    }
+  } else { konamiIdx = 0; }
+});
+</script>
 </body>
 </html>
