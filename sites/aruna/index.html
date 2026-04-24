@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager</title>
+  <style>
+    :root {
+      --bg: #f6f8ff;
+      --surface: #ffffff;
+      --primary: #2563eb;
+      --primary-strong: #1d4ed8;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --danger: #dc2626;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: radial-gradient(circle at top, #eef2ff 0%, #f8fafc 60%);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 20px 56px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 24px 50px rgba(15, 23, 42, 0.08);
+      padding: 32px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2.2rem, 2.5vw, 3rem);
+      letter-spacing: -0.04em;
+    }
+
+    p.subtitle {
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+      margin-bottom: 28px;
+    }
+
+    .form-grid input,
+    .form-grid button {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 16px 18px;
+      font-size: 0.96rem;
+    }
+
+    .form-grid input {
+      background: #f9fafb;
+      outline: none;
+    }
+
+    .form-grid button {
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .form-grid button:hover {
+      background: var(--primary-strong);
+      transform: translateY(-1px);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .filter-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 10px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .filter-btn.active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .task-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 18px;
+    }
+
+    .task-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: #fbfbff;
+    }
+
+    .task-details {
+      display: grid;
+      gap: 8px;
+    }
+
+    .task-title {
+      margin: 0;
+      font-size: 1.06rem;
+      font-weight: 600;
+    }
+
+    .task-status {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-weight: 700;
+    }
+
+    .badge.done { background: #dcfce7; color: #166534; }
+    .badge.pending { background: #eef2ff; color: #1d4ed8; }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: end;
+    }
+
+    .controls button {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 10px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .controls button.edit {
+      color: var(--primary);
+    }
+
+    .controls button.delete {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .controls button:hover {
+      background: #f8fafc;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: 20px;
+      background: #ffffff;
+    }
+
+    @media (max-width: 680px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .task-item { grid-template-columns: 1fr; }
+      .controls { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page card">
+    <h1>Task Manager</h1>
+    <p class="subtitle">Track your tasks with title, description, and status. Add, edit, and delete items in one simple dashboard.</p>
+
+    <form id="task-form" class="form-grid" autocomplete="off">
+      <input type="text" id="title" placeholder="Task title" required />
+      <input type="text" id="description" placeholder="Task description (optional)" />
+      <button type="submit">Add Task</button>
+    </form>
+
+    <div class="filters">
+      <button type="button" class="filter-btn active" data-filter="all">All</button>
+      <button type="button" class="filter-btn" data-filter="pending">Pending</button>
+      <button type="button" class="filter-btn" data-filter="done">Done</button>
+    </div>
+
+    <ul id="task-list" class="task-list"></ul>
+  </main>
+
+  <script>
+    const form = document.getElementById('task-form');
+    const titleInput = document.getElementById('title');
+    const descInput = document.getElementById('description');
+    const taskList = document.getElementById('task-list');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    let currentFilter = 'all';
+    let editingId = null;
+
+    const saveTasks = () => localStorage.setItem('tasks', JSON.stringify(tasks));
+
+    const renderTasks = () => {
+      taskList.innerHTML = '';
+      const visibleTasks = tasks.filter(task => currentFilter === 'all' || task.status === currentFilter);
+
+      if (visibleTasks.length === 0) {
+        taskList.innerHTML = `<div class="empty-state"><strong>No tasks yet.</strong><p>Add a task to get started.</p></div>`;
+        return;
+      }
+
+      visibleTasks.forEach(task => {
+        const item = document.createElement('li');
+        item.className = 'task-item';
+
+        const content = document.createElement('div');
+        content.className = 'task-details';
+        content.innerHTML = `
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <h2 class="task-title">${task.title}</h2>
+            <span class="badge ${task.status}">${task.status}</span>
+          </div>
+          <p style="margin:0;color:${task.description ? '#4b5563' : '#9ca3af'};">${task.description || 'No description provided.'}</p>
+        `;
+
+        const controls = document.createElement('div');
+        controls.className = 'controls';
+
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.textContent = task.status === 'done' ? 'Mark Pending' : 'Mark Done';
+        toggle.className = 'edit';
+        toggle.addEventListener('click', () => toggleStatus(task.id));
+
+        const edit = document.createElement('button');
+        edit.type = 'button';
+        edit.textContent = 'Edit';
+        edit.className = 'edit';
+        edit.addEventListener('click', () => startEdit(task.id));
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.textContent = 'Delete';
+        remove.className = 'delete';
+        remove.addEventListener('click', () => deleteTask(task.id));
+
+        controls.append(toggle, edit, remove);
+        item.append(content, controls);
+        taskList.appendChild(item);
+      });
+    };
+
+    const addTask = (title, description) => {
+      tasks.unshift({
+        id: Date.now(),
+        title,
+        description,
+        status: 'pending'
+      });
+      saveTasks();
+      renderTasks();
+    };
+
+    const updateTask = (id, title, description) => {
+      tasks = tasks.map(task => task.id === id ? { ...task, title, description } : task);
+      saveTasks();
+      renderTasks();
+    };
+
+    const toggleStatus = id => {
+      tasks = tasks.map(task => task.id === id ? { ...task, status: task.status === 'done' ? 'pending' : 'done' } : task);
+      saveTasks();
+      renderTasks();
+    };
+
+    const deleteTask = id => {
+      tasks = tasks.filter(task => task.id !== id);
+      saveTasks();
+      renderTasks();
+    };
+
+    const startEdit = id => {
+      const task = tasks.find(item => item.id === id);
+      if (!task) return;
+      titleInput.value = task.title;
+      descInput.value = task.description;
+      editingId = id;
+      form.querySelector('button').textContent = 'Update Task';
+    };
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const title = titleInput.value.trim();
+      const description = descInput.value.trim();
+      if (!title) return;
+
+      if (editingId) {
+        updateTask(editingId, title, description);
+        editingId = null;
+        form.querySelector('button').textContent = 'Add Task';
+      } else {
+        addTask(title, description);
+      }
+
+      titleInput.value = '';
+      descInput.value = '';
+    });
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        currentFilter = button.dataset.filter;
+        renderTasks();
+      });
+    });
+
+    renderTasks();
+  </script>
+</body>
+</html>
