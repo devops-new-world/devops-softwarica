@@ -1,4 +1,4 @@
-name: Deploy Natak Full Stack App
+name: Deploy Natak Full Stack App in VM
 
 on:
   push:
