@@ -36,7 +36,7 @@
 
     - name: Deploy default landing page
       copy:
-        src: "../../../../../sites/bench/index.html"
+        src: "../../../../../sites/ravijaiswal/index.html"
         dest: "/var/www/html/"
         owner: www-data
         group: www-data
