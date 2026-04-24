@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - Bench-Shothai
+    tags:
+      - "v1.0.0"
 
 jobs:
   build-and-push:
