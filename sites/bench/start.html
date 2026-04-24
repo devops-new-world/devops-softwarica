@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bench 01 | DevOps Landing Page</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #1a1a1a;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e9e9e9 100%);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Navigation */
+    nav {
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 0;
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #2563eb;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #666;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #2563eb;
+    }
+
+    /* Hero Section */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      padding: 6rem 0;
+    }
+
+    .hero-content h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3.5rem;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      color: #1a1a1a;
+    }
+
+    .hero-content p {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      color: white;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #2563eb;
+      border: 2px solid #2563eb;
+    }
+
+    .btn-secondary:hover {
+      background: #f0f4ff;
+      transform: translateY(-2px);
+    }
+
+    .hero-visual {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+      border-radius: 16px;
+      padding: 2rem;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 400px;
+      box-shadow: 0 20px 40px rgba(37, 99, 235, 0.2);
+    }
+
+    .hero-visual h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      padding: 4rem 0;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: #1a1a1a;
+    }
+
+    .feature-card p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    /* Section */
+    section {
+      padding: 4rem 0;
+    }
+
+    section h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #1a1a1a;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    /* Footer */
+    footer {
+      background: #1a1a1a;
+      color: white;
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 4rem;
+    }
+
+    footer p {
+      margin: 0.5rem 0;
+      color: #aaa;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 3rem 0;
+      }
+
+      .hero-content h1 {
+        font-size: 2.5rem;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        gap: 1rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="container">
+      <div class="nav-content">
+        <a href="#" class="logo">
+          <div class="logo-icon">B</div>
+          Bench 01
+        </a>
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#deployment">Deployment</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" style="padding-top: 4rem;">
+    <div class="container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+      <div class="hero-content">
+        <h1>Deploy with Confidence</h1>
+        <p>Bench 01 is your modern DevOps landing page. Built with Terraform infrastructure provisioning and Ansible configuration management, it brings your infrastructure to life with clean deployment workflows.</p>
+        <div class="cta-buttons">
+          <a href="#features" class="btn btn-primary">Explore Features</a>
+          <a href="#deployment" class="btn btn-secondary">See Deployment</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <h2>Infrastructure Ready</h2>
+        <p style="font-size: 1.05rem; opacity: 0.9;">
+          ✓ Terraform provisioned VMs<br>
+          ✓ Ansible automated deployment<br>
+          ✓ Nginx web server<br>
+          ✓ GitHub Actions CI/CD<br>
+          ✓ Production ready
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features">
+    <div class="container">
+      <h2>Why Bench 01?</h2>
+      <p class="section-subtitle">Modern infrastructure deployment made simple and reliable</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🏗️</div>
+          <h3>Infrastructure as Code</h3>
+          <p>Terraform-based infrastructure that's version-controlled, repeatable, and auditable. Define your AWS resources once, deploy everywhere.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚙️</div>
+          <h3>Configuration Management</h3>
+          <p>Ansible playbooks automate Nginx setup and application deployment. No manual SSH sessions, just idempotent automation.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>CI/CD Integration</h3>
+          <p>GitHub Actions workflows trigger automatic deployments. Push to bench_01 branch and watch your infrastructure update in real-time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deployment Section -->
+  <section id="deployment">
+    <div class="container">
+      <h2>Deploy in 3 Steps</h2>
+      <p class="section-subtitle">From code to production in minutes</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">1️⃣</div>
+          <h3>Provision Infrastructure</h3>
+          <p>Run Terraform workflow on GitHub Actions. Specify AWS credentials, region, and instance count. EC2 instances launch automatically.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">2️⃣</div>
+          <h3>Configure with Ansible</h3>
+          <p>Trigger Ansible playbook with server IP. Nginx installs, SSL configures, and your site deploys. All automated and idempotent.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">3️⃣</div>
+          <h3>Access Your Site</h3>
+          <p>Visit your server's public IP in any browser. Your application is live, monitored, and ready for production traffic.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about">
+    <div class="container">
+      <h2>The Bench 01 Stack</h2>
+      <p class="section-subtitle">Production-grade technologies for reliable deployments</p>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+        <div class="feature-card">
+          <h3>Frontend</h3>
+          <p><strong>Nginx:</strong> High-performance reverse proxy and web server. Handles static assets, SSL termination, and load balancing with minimal resource overhead.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Infrastructure</h3>
+          <p><strong>Terraform:</strong> AWS EC2 instances, security groups, and networking. Infrastructure versioning, state management, and disaster recovery built-in.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Orchestration</h3>
+          <p><strong>Ansible:</strong> Agentless configuration management. Playbooks define desired state; Ansible ensures compliance without system agents.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Automation</h3>
+          <p><strong>GitHub Actions:</strong> CI/CD workflows triggered on push. Terraform and Ansible runs orchestrated from version control.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p><strong>Bench 01</strong> &mdash; Modern DevOps Landing Page</p>
+      <p>Built with Terraform, Ansible, and GitHub Actions</p>
+      <p style="margin-top: 2rem; color: #555;">Production-ready infrastructure automation</p>
+    </div>
+  </footer>
+</body>
+</html>
