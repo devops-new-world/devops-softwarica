@@ -1,1 +1,76 @@
-sanket@eef1df54591c.mylabserver.com
+<<<<<<< HEAD
+.DS_Store
+.vscode/
+=======
+# =========================
+# Dependencies
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Build outputs
+# =========================
+dist/
+build/
+out/
+
+# React build folder
+/frontend/build/
+/client/build/
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Testing
+# =========================
+coverage/
+
+# =========================
+# Runtime / process
+# =========================
+pids/
+*.pid
+*.seed
+
+# =========================
+# Docker (optional)
+# =========================
+.docker/
+
+# =========================
+# Misc
+# =========================
+.tmp/
+temp/
+>>>>>>> 0c9173618f7c65c2a684d68166f4ed194d0bfdf3

@@ -1,105 +1,90 @@
-name: Deploy VMs with Terraform bench-random
+name: Deploy VMs with Terraform
 
 on:
   workflow_dispatch:
     inputs:
-      access_key_id:
-        description: "AWS Access Key ID"
+      action:
+        description: 'Terraform Action'
+        required: true
+        type: choice
+        options:
+          - 'plan'
+          - 'apply'
+          - 'destroy'
+        default: 'plan'
+      aws_region:
+        description: 'AWS Region'
         required: true
         type: string
-      secret_access_key: 
-        description: 'AWS Secret Access Key'
-        required: true
-        type: string
-      default_region:
-        description: "AWS Default Region"
-        required: true
-        type: string
-        default: "us-east-1"
+        default: 'us-east-1'
       vm_type:
-        description: "Type of VM to deploy"
+        description: 'VM Type (cluster or general)'
         required: true
         type: choice
         options:
-          - "general"
-          - "cluster"
-        default: "general"
-      server_count:
-        description: "EC2 Instance Count (Server Nodes, max 7)"
-        required: true
-        type: choice
-        options:
-          - "1"
-          - "2"
-          - "3"
-          - "4"
-          - "5"
-          - "6"
-          - "7"
-        default: "2"
-      machine_spec:
-        description: "Machine Instance Type"
-        required: true
-        type: choice
-        options:
-          - "t3.small"
-          - "t3.medium"
-        default: "t3.small"
+          - 'cluster'
+          - 'general'
+        default: 'cluster'
 
 jobs:
-  terraform-deploy:
+  terraform:
     name: Deploy Infrastructure with Terraform
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ inputs.access_key_id }}
-          aws-secret-access-key: ${{ inputs.secret_access_key }}
-          aws-region: ${{ inputs.default_region }}
-
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: latest
 
-      - name: Terraform Init
-        working-directory: ./infra/terraform
-        run: terraform init
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
 
-      - name: Setup SSH public key
+      - name: Terraform Init
         run: |
-          echo "${{ secrets.SSH_PUBLIC_KEY }}" > /tmp/ssh_public_key.pub
+          cd infra/terraform
+          terraform init
 
       - name: Terraform Plan
-        working-directory: ./infra/terraform
-        env:
-          TF_VAR_aws_region: ${{ inputs.default_region }}
-          TF_VAR_instance_type: ${{ inputs.machine_spec }}
-          TF_VAR_server_count: ${{ inputs.server_count }}
-          TF_VAR_vm_type: ${{ inputs.vm_type }}
-          TF_VAR_project_name: k8s-cluster
-          TF_VAR_public_key_file: /tmp/ssh_public_key.pub
+        if: ${{ inputs.action == 'plan' || inputs.action == 'apply' }}
         run: |
+          cd infra/terraform
           terraform plan \
-            -var="aws_region=${{ inputs.default_region }}" \
-            -var="instance_type=${{ inputs.machine_spec }}" \
-            -var="server_count=${{ inputs.server_count }}" \
+            -var="aws_region=${{ inputs.aws_region }}" \
             -var="vm_type=${{ inputs.vm_type }}" \
-            -var="project_name=k8s-cluster" \
-            -var="public_key_file=/tmp/ssh_public_key.pub" \
             -out=tfplan
 
       - name: Terraform Apply
-        working-directory: ./infra/terraform
-        env:
-          TF_VAR_public_key_file: /tmp/ssh_public_key.pub
-        run: terraform apply -auto-approve tfplan
+        if: ${{ inputs.action == 'apply' }}
+        run: |
+          cd infra/terraform
+          terraform apply -auto-approve tfplan
 
-      - name: Terraform Output
-        working-directory: ./infra/terraform
-        run: terraform output
+      - name: Terraform Destroy
+        if: ${{ inputs.action == 'destroy' }}
+        run: |
+          cd infra/terraform
+          terraform destroy \
+            -var="aws_region=${{ inputs.aws_region }}" \
+            -var="vm_type=${{ inputs.vm_type }}" \
+            -auto-approve
+
+      - name: Output Infrastructure Details
+        if: ${{ inputs.action == 'apply' }}
+        run: |
+          cd infra/terraform
+          echo "=== Infrastructure Deployed ==="
+          terraform output
+
+      - name: Display Terraform Plan
+        if: ${{ inputs.action == 'plan' }}
+        run: |
+          echo "=== Terraform Plan Generated ==="
+          echo "Review the plan above and run 'apply' action to deploy"

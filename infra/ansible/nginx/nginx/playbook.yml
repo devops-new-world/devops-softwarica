@@ -2,21 +2,18 @@
 - name: Setup Nginx Server
   hosts: all
   become: yes
-
   vars:
-<<<<<<< HEAD
+    # Define backends for the default server
     nginx_backends: []
-
+    # Example backend configuration:
+    #  - path: "/app1"
+    #    proxy_pass: "http://127.0.0.1:8081"
+    
+    # Define other standalone virtual hosts
     nginx_vhosts:
       - server_name: "example.com"
         port: 80
         root: "/var/www/example"
-=======
-    # The React landing page now lives inside the frontend Docker image.
-    # Host nginx only reverse-proxies traffic to the frontend container.
-    frontend_proxy_pass: "http://127.0.0.1:8080"
-    nginx_vhosts: []
->>>>>>> main
 
   tasks:
     - name: Install Nginx
@@ -37,25 +34,17 @@
         state: absent
       notify: Reload Nginx
 
-<<<<<<< HEAD
-    # ✅ FIXED TASK (NO RELATIVE PATHS)
     - name: Deploy default landing page
       copy:
-        src: public/
-        dest: /var/www/html/
-=======
-    - name: Deploy HamroCRUD site
-      copy:
-        src: "../../../../sites/aruna/"
+        src: "../../../../../sites/ravijaiswal/index.html"
         dest: "/var/www/html/"
->>>>>>> main
         owner: www-data
         group: www-data
-        mode: "0644"
+        mode: '0644'
 
     - name: Configure default server with proxy backends
       template:
-        src: default.conf.j2
+        src: templates/default.conf.j2
         dest: /etc/nginx/sites-available/default.conf
       notify: Reload Nginx
 
@@ -68,7 +57,7 @@
 
     - name: Configure other virtual hosts
       template:
-        src: vhost.conf.j2
+        src: templates/vhost.conf.j2
         dest: "/etc/nginx/sites-available/{{ item.server_name }}.conf"
       loop: "{{ nginx_vhosts | default([]) }}"
       notify: Reload Nginx
