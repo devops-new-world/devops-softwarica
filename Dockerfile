@@ -1,2 +1,2 @@
-FROM nginx:alpine
-COPY sites /usr/share/nginx/html
+FROM nginx:latest
+COPY sites/bench-sanin/index.html /usr/share/nginx/html/index.html

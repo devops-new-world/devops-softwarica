@@ -28,7 +28,15 @@
         state: absent
       notify: Reload Nginx
 
-    - name: Configure default server as reverse proxy to frontend container
+    - name: Deploy HamroCRUD site
+      copy:
+        src: "../../../../sites/bench-sanin/index.html"
+        dest: "/var/www/html/index.html"
+        owner: www-data
+        group: www-data
+        mode: "0644"
+
+    - name: Configure default server with proxy backends
       template:
         src: default.conf.j2
         dest: /etc/nginx/sites-available/default.conf

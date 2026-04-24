@@ -1,10 +1,9 @@
-name: Bench-Shothai CI/CD
+name: Bench-Sanin CI/CD
 
 on:
   push:
     tags:
-      - "**"
-
+      - '**'
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -17,11 +16,10 @@ jobs:
         run: echo "${{ secrets.ABHISHEK_DOCKER_TOKEN }}" | docker login -u ${{ secrets.ABHISHEK_DOCKER_USERNAME }} --password-stdin
 
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/bench-shothai-site:latest .
+        run: docker build -t ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/bench-sanin-site:latest .
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/bench-shothai-site:latest
-
+        run: docker push ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/bench-sanin-site:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -30,9 +28,9 @@ jobs:
     steps:
       - name: Simulate Deployment
         run: |
-          echo "🚀 Deploying Bench-Shothai site..."
+          echo "🚀 Deploying Bench-Sanin site..."
           echo "Pulling image..."
-          echo "docker pull ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/bench-shothai-site:latest"
+          echo "docker pull ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/bench-sanin-site:latest"
           echo "Stopping old container..."
           echo "docker stop group_site || true"
           echo "Removing old container..."
@@ -40,4 +38,3 @@ jobs:
           echo "Starting new container on port 8020..."
           echo "docker run -d -p 8020:80 --name group_site ${{ secrets.ABHISHEK_DOCKER_USERNAME }}/bench-shothai-site:latest"
           echo "✅ Deployment simulated successfully!"
-
