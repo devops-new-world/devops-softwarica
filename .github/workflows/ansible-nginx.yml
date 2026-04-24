@@ -1,68 +1,34 @@
-name: Provision Nginx Server
+name: Deploy Nginx Site (Ansible)
 
 on:
   workflow_dispatch:
-    inputs:
-      server_ip:
-        description: 'Target Server IP Address'
-        required: true
-        type: string
-      ssh_user:
-        description: 'SSH User'
-        required: true
-        type: string
-        default: 'ubuntu'
-      auth_method:
-        description: 'SSH Authentication Method'
-        required: true
-        type: choice
-        options:
-          - 'password'
-          - 'key'
-        default: 'password'
-      ssh_password:
-        description: 'SSH Password (only used if auth_method is password)'
-        required: false
-        type: string
-        default: 'changeme'
 
 jobs:
-  provision-nginx:
-    name: Run Ansible Playbook
+  deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install sshpass
-        if: ${{ inputs.auth_method == 'password' }}
-        run: sudo apt-get update && sudo apt-get install -y sshpass
-
-      - name: Setup SSH Key
-        if: ${{ inputs.auth_method == 'key' }}
+      - name: Install Ansible + sshpass
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ inputs.server_ip }} >> ~/.ssh/known_hosts
+          sudo apt update
+          sudo apt install -y ansible sshpass
 
-      - name: Run Ansible Playbook (Password Auth)
-        if: ${{ inputs.auth_method == 'password' }}
-        working-directory: ./k8s/infra/ansible/nginx/nginx
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
+      - name: Create inventory
         run: |
-          echo "${{ inputs.server_ip }} ansible_user=${{ inputs.ssh_user }} ansible_ssh_pass='${{ inputs.ssh_password }}'" > inventory.ini
-          ansible all -i inventory.ini -m ping
-          ansible-playbook -i inventory.ini playbook.yml
+          echo "[web]" > inventory.ini
+          echo "benchvm ansible_host=54.242.136.129 ansible_user=ubuntu ansible_ssh_pass=changeme" >> inventory.ini
 
-      - name: Run Ansible Playbook (Key Auth)
-        if: ${{ inputs.auth_method == 'key' }}
-        working-directory: ./k8s/infra/ansible/nginx/nginx
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
+      - name: Disable host key checking
         run: |
-          echo "${{ inputs.server_ip }} ansible_user=${{ inputs.ssh_user }}" > inventory.ini
-          ansible all -i inventory.ini -m ping
-          ansible-playbook -i inventory.ini playbook.yml
+          echo -e "[defaults]\nhost_key_checking = False" > ansible.cfg
+
+      - name: Test connection
+        run: |
+          ansible -i inventory.ini web -m ping
+
+      - name: Run playbook
+        run: |
+          ansible-playbook -i inventory.ini infra/ansible/deploy-site.yml
