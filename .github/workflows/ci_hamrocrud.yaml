@@ -2,8 +2,14 @@ name: Deploy HamroCRUD website
 
 on:
   push:
-    branches:
-      - "bench-hamro"
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      server_ip:
+        description: "AWS EC2 Instance IP"
+        required: false
+        type: string
 
 jobs:
   docker-build-and-push:
@@ -36,18 +42,18 @@ jobs:
       - name: Copy index.html to Server
         uses: appleboy/scp-action@v1
         with:
-          host: 3.210.181.28
+          host: ${{ github.event.inputs.server_ip || '3.210.181.28' }}
           username: ubuntu
-          password: changeme
+          password: ${{ secrets.EC2_PASSWORD }}
           source: "sites/HamroCRUD/index.html"
           target: /tmp/
 
       - name: Deploy on Server
         uses: appleboy/ssh-action@master
         with:
-          host: 3.210.181.28
+          host: ${{ github.event.inputs.server_ip || '3.210.181.28' }}
           username: ubuntu
-          password: changeme
+          password: ${{ secrets.EC2_PASSWORD }}
           script: |
             sudo mkdir -p /var/www/html/
             sudo cp /tmp/sites/HamroCRUD/index.html /var/www/html/index.html
