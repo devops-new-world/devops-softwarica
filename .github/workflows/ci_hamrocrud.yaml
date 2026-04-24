@@ -33,20 +33,30 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install sshpass
-        run: sudo apt-get install -y sshpass
+      - name: Copy index.html to Server
+        uses: appleboy/scp-action@v1
+        with:
+          host: 3.210.181.28
+          username: ubuntu
+          password: changeme
+          source: "sites/HamroCRUD/index.html"
+          target: /tmp/
 
-      - name: Test SSH Connection
-        run: |
-          sshpass -p 'changeme' ssh -o StrictHostKeyChecking=no \
-          ubuntu@98.92.66.38 "echo SSH OK"
-
-      - name: Deploy Docker Container on Server
-        run: |
-          sshpass -p 'changeme' ssh -o StrictHostKeyChecking=no \
-          ubuntu@98.92.66.38 "
-            docker pull rezenn/rijen:latest &&
-            docker stop hamrocrud 2>/dev/null || true &&
-            docker rm hamrocrud 2>/dev/null || true &&
+      - name: Deploy on Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: 3.210.181.28
+          username: ubuntu
+          password: changeme
+          script: |
+            sudo mkdir -p /var/www/html/
+            sudo cp /tmp/sites/HamroCRUD/index.html /var/www/html/index.html
+            sudo chown -R www-data:www-data /var/www/html/
+            sudo apt-get install -y nginx
+            sudo systemctl enable nginx
+            sudo systemctl start nginx
+            docker pull rezenn/rijen:latest
+            docker stop hamrocrud 2>/dev/null || true
+            docker rm hamrocrud 2>/dev/null || true
             docker run -d --name hamrocrud -p 9092:80 rezenn/rijen:latest
-          "
+            echo "Done! Visit http://3.210.181.28"
